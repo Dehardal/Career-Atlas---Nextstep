@@ -1,0 +1,414 @@
+{
+  "nodes": [
+    {
+      "name": "PCB",
+      "type": "SUBJECT_COMBINATION",
+      "description": "Physics, Chemistry, and Biology subject combination",
+      "subjects": ["Physics", "Chemistry", "Biology"]
+    },
+    {
+      "name": "NEET",
+      "type": "EXAM",
+      "conductingBody": "NTA",
+      "website": "https://neet.nta.nic.in",
+      "frequency": "ANNUAL",
+      "description": "National Eligibility cum Entrance Test for undergraduate medical programs (MBBS, BDS, BAMS, BHMS)"
+    },
+    {
+      "name": "MBBS",
+      "type": "DEGREE",
+      "durationYears": 5.5,
+      "level": "UG",
+      "description": "Bachelor of Medicine and Bachelor of Surgery, the primary undergraduate medical degree in India"
+    },
+    {
+      "name": "BDS",
+      "type": "DEGREE",
+      "durationYears": 5,
+      "level": "UG",
+      "description": "Bachelor of Dental Surgery, the undergraduate degree for dental studies in India"
+    },
+    {
+      "name": "BAMS",
+      "type": "DEGREE",
+      "durationYears": 5.5,
+      "level": "UG",
+      "description": "Bachelor of Ayurvedic Medicine and Surgery, integrating modern medicine and traditional Ayurveda"
+    },
+    {
+      "name": "BHMS",
+      "type": "DEGREE",
+      "durationYears": 5.5,
+      "level": "UG",
+      "description": "Bachelor of Homeopathic Medicine and Surgery, covering homeopathic system knowledge"
+    },
+    {
+      "name": "BPT",
+      "type": "DEGREE",
+      "durationYears": 4.5,
+      "level": "UG",
+      "description": "Bachelor of Physiotherapy, focusing on physical therapy and rehabilitation"
+    },
+    {
+      "name": "Doctor",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 900000, "max": 3000000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "Healthcare",
+      "description": "Registered medical practitioner diagnosing and treating human physical ailments"
+    },
+    {
+      "name": "Dentist",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 500000, "max": 1800000, "currency": "INR" },
+      "growthRate": "MEDIUM",
+      "sector": "Healthcare",
+      "description": "Dental surgeon specializing in oral health, teeth, and gums surgeries"
+    },
+    {
+      "name": "Physiotherapist",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 400000, "max": 1200000, "currency": "INR" },
+      "growthRate": "MEDIUM",
+      "sector": "Healthcare",
+      "description": "Healthcare professional using physical exercises and therapies to restore movement and function"
+    },
+    {
+      "name": "Medical Anatomy",
+      "type": "SKILL",
+      "category": "DOMAIN_SPECIFIC",
+      "description": "Detailed structural understanding of human organs, tissues, bones, and nervous systems"
+    },
+    {
+      "name": "Clinical Diagnostics",
+      "type": "SKILL",
+      "category": "TECHNICAL",
+      "description": "Analyzing patient charts, symptoms, laboratory pathology results, and scans to diagnose diseases"
+    },
+    {
+      "name": "Dental Surgery Procedures",
+      "type": "SKILL",
+      "category": "TECHNICAL",
+      "description": "Oral surgeries, root canals, tooth extractions, and orthodontic configurations"
+    },
+    {
+      "name": "Therapeutic Exercises",
+      "type": "SKILL",
+      "category": "TECHNICAL",
+      "description": "Configuring kinesiology models, muscular therapies, and injury rehabilitation exercises"
+    },
+    {
+      "name": "B.Pharm",
+      "type": "DEGREE",
+      "durationYears": 4,
+      "level": "UG",
+      "description": "Bachelor of Pharmacy covering pharmacology, pharmaceutics, and pharmaceutical chemistry"
+    },
+    {
+      "name": "B.Sc Nursing",
+      "type": "DEGREE",
+      "durationYears": 4,
+      "level": "UG",
+      "description": "Bachelor of Science in Nursing training professional healthcare nurses"
+    },
+    {
+      "name": "B.Sc Biotechnology",
+      "type": "DEGREE",
+      "durationYears": 3,
+      "level": "UG",
+      "description": "Bachelor of Science in Biotechnology covering genetics, molecular biology, and bioprocess engineering"
+    },
+    {
+      "name": "Pharmacist",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 300000, "max": 1000000, "currency": "INR" },
+      "growthRate": "MEDIUM",
+      "sector": "Healthcare",
+      "description": "Healthcare professional dispensing medicines and counseling patients"
+    },
+    {
+      "name": "Registered Nurse",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 350000, "max": 900000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "Healthcare",
+      "description": "Healthcare professional providing nursing care to patients"
+    },
+    {
+      "name": "Biotechnologist",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 450000, "max": 1500000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "Research & Biotech",
+      "description": "Scientist developing bio-based products and medical therapies"
+    },
+    {
+      "name": "Maulana Azad Medical College Delhi",
+      "type": "INSTITUTE",
+      "location": { "city": "New Delhi", "state": "Delhi" },
+      "ownership": "GOVERNMENT",
+      "nirfRanking": 24,
+      "category": "Medical",
+      "description": "Premier government medical college located in New Delhi"
+    },
+    {
+      "name": "PCMB",
+      "type": "SUBJECT_COMBINATION",
+      "description": "Physics, Chemistry, Mathematics, and Biology subject combination",
+      "subjects": ["Physics", "Chemistry", "Mathematics", "Biology"]
+    },
+    {
+      "name": "B.Tech Biotechnology",
+      "type": "DEGREE",
+      "durationYears": 4,
+      "level": "UG",
+      "description": "Bachelor of Technology in Biotechnology integrating engineering principles with life sciences"
+    },
+    {
+      "name": "B.Tech Biomedical Engineering",
+      "type": "DEGREE",
+      "durationYears": 4,
+      "level": "UG",
+      "description": "Bachelor of Technology in Biomedical Engineering designing medical devices and healthcare systems"
+    },
+    {
+      "name": "B.Sc Food Technology",
+      "type": "DEGREE",
+      "durationYears": 3,
+      "level": "UG",
+      "description": "Bachelor of Science in Food Technology focusing on food processing, preservation, and quality control"
+    },
+    {
+      "name": "Biomedical Engineer",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 500000, "max": 1800000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "Engineering & Healthcare",
+      "description": "Professional designing medical equipment and health software"
+    },
+    {
+      "name": "Food Technologist",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 400000, "max": 1200000, "currency": "INR" },
+      "growthRate": "MEDIUM",
+      "sector": "Food Industry",
+      "description": "Specialist overseeing food production standards and preservation techniques"
+    }
+  ],
+  "relationships": [
+    {
+      "fromNodeName": "Science Stream",
+      "toNodeName": "PCB",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "PCB",
+      "toNodeName": "NEET",
+      "type": "ELIGIBLE_FOR",
+      "metadata": { "minimumPercentage": 50, "description": "Requires minimum 50% aggregate in PCB in Class 12 boards" }
+    },
+    {
+      "fromNodeName": "PCB",
+      "toNodeName": "BPT",
+      "type": "ELIGIBLE_FOR",
+      "metadata": { "minimumPercentage": 50, "description": "Admission via direct board merit list or state entrance tests" }
+    },
+    {
+      "fromNodeName": "NEET",
+      "toNodeName": "MBBS",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admissions based on NEET UG scorecard counseling rounds" }
+    },
+    {
+      "fromNodeName": "NEET",
+      "toNodeName": "BDS",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admissions based on NEET UG scorecard counseling rounds" }
+    },
+    {
+      "fromNodeName": "NEET",
+      "toNodeName": "BAMS",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Ayush admissions counseling based on NEET UG score" }
+    },
+    {
+      "fromNodeName": "NEET",
+      "toNodeName": "BHMS",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Ayush admissions counseling based on NEET UG score" }
+    },
+    {
+      "fromNodeName": "MBBS",
+      "toNodeName": "Doctor",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "BAMS",
+      "toNodeName": "Doctor",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Practitioner registered under Ayurvedic Medicine board" }
+    },
+    {
+      "fromNodeName": "BHMS",
+      "toNodeName": "Doctor",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Practitioner registered under Homeopathic Medicine board" }
+    },
+    {
+      "fromNodeName": "BDS",
+      "toNodeName": "Dentist",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "BPT",
+      "toNodeName": "Physiotherapist",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "Doctor",
+      "toNodeName": "Medical Anatomy",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Doctor",
+      "toNodeName": "Clinical Diagnostics",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Dentist",
+      "toNodeName": "Medical Anatomy",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Dentist",
+      "toNodeName": "Dental Surgery Procedures",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Physiotherapist",
+      "toNodeName": "Medical Anatomy",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Physiotherapist",
+      "toNodeName": "Therapeutic Exercises",
+      "type": "REQUIRES"
+    },
+
+    {
+      "fromNodeName": "PCB",
+      "toNodeName": "B.Sc Biotechnology",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "B.Pharm",
+      "toNodeName": "Pharmacist",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Sc Nursing",
+      "toNodeName": "Registered Nurse",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Sc Biotechnology",
+      "toNodeName": "Biotechnologist",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "All India Institute of Medical Sciences Delhi",
+      "toNodeName": "MBBS",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "All India Institute of Medical Sciences Delhi",
+      "toNodeName": "NEET",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "All India Institute of Medical Sciences Delhi",
+      "toNodeName": "B.Sc Nursing",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "Maulana Azad Medical College Delhi",
+      "toNodeName": "MBBS",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "Maulana Azad Medical College Delhi",
+      "toNodeName": "NEET",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Science Stream",
+      "toNodeName": "PCMB",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "PCMB",
+      "toNodeName": "JEE Main",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "PCMB",
+      "toNodeName": "BITSAT",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "PCMB",
+      "toNodeName": "VITEEE",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "PCMB",
+      "toNodeName": "NEET",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "PCMB",
+      "toNodeName": "ICAR AIEEA UG",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "PCMB",
+      "toNodeName": "B.Tech Biotechnology",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "PCMB",
+      "toNodeName": "B.Tech Biomedical Engineering",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "PCMB",
+      "toNodeName": "B.Sc Food Technology",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "B.Tech Biotechnology",
+      "toNodeName": "Biotechnologist",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech Biomedical Engineering",
+      "toNodeName": "Biomedical Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Sc Food Technology",
+      "toNodeName": "Food Technologist",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "Indian Institute of Technology Bombay",
+      "toNodeName": "B.Tech Biotechnology",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "Indian Institute of Technology Bombay",
+      "toNodeName": "B.Tech Biomedical Engineering",
+      "type": "OFFERS"
+    }
+  ]
+}

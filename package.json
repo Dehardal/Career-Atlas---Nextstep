@@ -1,0 +1,28 @@
+{
+  "name": "career-atlas",
+  "version": "1.0.0",
+  "description": "Career Knowledge Graph Platform navigating Indian educational pathways from Class 8 to Occupations",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "backend:dev": "npm run dev --workspace=backend",
+    "backend:build": "npm run build --workspace=backend",
+    "backend:start": "npm run start --workspace=backend",
+    "seed": "npm run seed --workspace=backend",
+    "seed:engineering": "npm run seed:engineering --workspace=backend",
+    "seed:medical": "npm run seed:medical --workspace=backend",
+    "seed:commerce": "npm run seed:commerce --workspace=backend",
+    "seed:law": "npm run seed:law --workspace=backend",
+    "seed:defence": "npm run seed:defence --workspace=backend",
+    "seed:design": "npm run seed:design --workspace=backend",
+    "seed:government": "npm run seed:government --workspace=backend",
+    "seed:arts": "npm run seed:arts --workspace=backend",
+    "seed:hospitality": "npm run seed:hospitality --workspace=backend",
+    "seed:agriculture": "npm run seed:agriculture --workspace=backend",
+    "test-graph": "npm run test-graph --workspace=backend",
+    "test-roadmap": "npm run test-roadmap --workspace=backend"
+  }
+}

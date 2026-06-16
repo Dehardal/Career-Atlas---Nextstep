@@ -1,0 +1,587 @@
+{
+  "nodes": [
+    {
+      "name": "PCM",
+      "type": "SUBJECT_COMBINATION",
+      "description": "Physics, Chemistry, and Mathematics subject combination",
+      "subjects": ["Physics", "Chemistry", "Mathematics"]
+    },
+    {
+      "name": "JEE Main",
+      "type": "EXAM",
+      "conductingBody": "NTA",
+      "website": "https://jeemain.nta.ac.in",
+      "frequency": "ANNUAL",
+      "description": "Joint Entrance Examination Main for admissions to NITs, IIITs, and Centrally Funded Technical Institutions"
+    },
+    {
+      "name": "JEE Advanced",
+      "type": "EXAM",
+      "conductingBody": "IIT Council",
+      "website": "https://jeeadv.ac.in",
+      "frequency": "ANNUAL",
+      "description": "Joint Entrance Examination Advanced for admissions to Indian Institutes of Technology (IITs)"
+    },
+    {
+      "name": "BITSAT",
+      "type": "EXAM",
+      "conductingBody": "BITS Pilani",
+      "website": "https://www.bitsadmission.com",
+      "frequency": "ANNUAL",
+      "description": "Birla Institute of Technology and Science Admission Test for BITS campuses in Pilani, Goa, and Hyderabad"
+    },
+    {
+      "name": "VITEEE",
+      "type": "EXAM",
+      "conductingBody": "Vellore Institute of Technology",
+      "website": "https://viteee.vit.ac.in",
+      "frequency": "ANNUAL",
+      "description": "Vellore Institute of Technology Engineering Entrance Examination for VIT group of institutions"
+    },
+    {
+      "name": "B.Tech CSE",
+      "type": "DEGREE",
+      "durationYears": 4,
+      "level": "UG",
+      "description": "Bachelor of Technology in Computer Science & Engineering"
+    },
+    {
+      "name": "B.Tech IT",
+      "type": "DEGREE",
+      "durationYears": 4,
+      "level": "UG",
+      "description": "Bachelor of Technology in Information Technology"
+    },
+    {
+      "name": "B.Tech AI",
+      "type": "DEGREE",
+      "durationYears": 4,
+      "level": "UG",
+      "description": "Bachelor of Technology in Artificial Intelligence & Machine Learning"
+    },
+    {
+      "name": "B.Tech Mechanical",
+      "type": "DEGREE",
+      "durationYears": 4,
+      "level": "UG",
+      "description": "Bachelor of Technology in Mechanical Engineering"
+    },
+    {
+      "name": "B.Tech Civil",
+      "type": "DEGREE",
+      "durationYears": 4,
+      "level": "UG",
+      "description": "Bachelor of Technology in Civil Engineering"
+    },
+    {
+      "name": "B.Tech Electrical",
+      "type": "DEGREE",
+      "durationYears": 4,
+      "level": "UG",
+      "description": "Bachelor of Technology in Electrical & Electronics Engineering"
+    },
+    {
+      "name": "Software Engineer",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 800000, "max": 2500000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "IT",
+      "description": "Professional designing, writing, testing, and debugging software applications"
+    },
+    {
+      "name": "Data Scientist",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 1000000, "max": 3000000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "IT & Analytics",
+      "description": "Specialist extracting actionable business patterns from structured and unstructured big data"
+    },
+    {
+      "name": "AI Engineer",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 1200000, "max": 3500000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "IT & Research",
+      "description": "Developer building, testing, and deploying neural networks and machine learning models"
+    },
+    {
+      "name": "Cloud Engineer",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 800000, "max": 2200000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "IT Infrastructure",
+      "description": "Engineer configuring and managing cloud services (AWS, GCP, Azure) and infrastructure"
+    },
+    {
+      "name": "DevOps Engineer",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 900000, "max": 2400000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "IT Infrastructure",
+      "description": "Developer bridging development operations, CI/CD pipelines, and server automations"
+    },
+    {
+      "name": "Mechanical Engineer",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 500000, "max": 1800000, "currency": "INR" },
+      "growthRate": "MEDIUM",
+      "sector": "Manufacturing",
+      "description": "Designer and builder of mechanical devices, engines, robotics, and industrial machineries"
+    },
+    {
+      "name": "Civil Engineer",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 450000, "max": 1500000, "currency": "INR" },
+      "growthRate": "MEDIUM",
+      "sector": "Infrastructure",
+      "description": "Designer, supervisor, and builder of public structures, bridges, roadways, and dams"
+    },
+    {
+      "name": "Programming",
+      "type": "SKILL",
+      "category": "TECHNICAL",
+      "description": "Ability to write logical instructions using languages like Python, Java, C++, or JavaScript"
+    },
+    {
+      "name": "DSA",
+      "type": "SKILL",
+      "category": "TECHNICAL",
+      "description": "Knowledge of basic and advanced Data Structures and Algorithms for code optimization"
+    },
+    {
+      "name": "Databases",
+      "type": "SKILL",
+      "category": "TECHNICAL",
+      "description": "Designing schemas and managing relational (SQL) and non-relational (NoSQL) databases"
+    },
+    {
+      "name": "Cloud Computing",
+      "type": "SKILL",
+      "category": "TECHNICAL",
+      "description": "Managing cloud architectures, hosting services, and serverless computing concepts"
+    },
+    {
+      "name": "Machine Learning",
+      "type": "SKILL",
+      "category": "TECHNICAL",
+      "description": "Statistical modeling, training classifiers, regression algorithms, and deep learning libraries"
+    },
+    {
+      "name": "B.Arch",
+      "type": "DEGREE",
+      "durationYears": 5,
+      "level": "UG",
+      "description": "Bachelor of Architecture focusing on building design, construction sciences, and spatial planning"
+    },
+    {
+      "name": "NATA",
+      "type": "EXAM",
+      "conductingBody": "CoA",
+      "website": "https://www.nata.in",
+      "frequency": "ANNUAL",
+      "description": "National Aptitude Test in Architecture for admissions to undergraduate architecture courses"
+    },
+    {
+      "name": "BCA",
+      "type": "DEGREE",
+      "durationYears": 3,
+      "level": "UG",
+      "description": "Bachelor of Computer Applications focusing on database management, software development, and web design"
+    },
+    {
+      "name": "B.Sc (Hons) in Mathematics",
+      "type": "DEGREE",
+      "durationYears": 3,
+      "level": "UG",
+      "description": "Bachelor of Science in Mathematics covering calculus, algebra, and statistics"
+    },
+    {
+      "name": "Architect",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 400000, "max": 1500000, "currency": "INR" },
+      "growthRate": "MEDIUM",
+      "sector": "Construction & Design",
+      "description": "Professional designing buildings and public spaces"
+    },
+    {
+      "name": "Data Analyst",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 500000, "max": 1800000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "IT",
+      "description": "Analyst transforming data into business insights"
+    },
+    {
+      "name": "Birla Institute of Technology and Science, Pilani",
+      "type": "INSTITUTE",
+      "location": { "city": "Pilani", "state": "Rajasthan" },
+      "ownership": "PRIVATE",
+      "nirfRanking": 25,
+      "category": "Technical",
+      "description": "Premier private technical university in India"
+    },
+    {
+      "name": "Vellore Institute of Technology",
+      "type": "INSTITUTE",
+      "location": { "city": "Vellore", "state": "Tamil Nadu" },
+      "ownership": "PRIVATE",
+      "nirfRanking": 11,
+      "category": "Technical",
+      "description": "Premier private technical university in Tamil Nadu"
+    }
+  ],
+  "relationships": [
+    {
+      "fromNodeName": "Science Stream",
+      "toNodeName": "PCM",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "PCM",
+      "toNodeName": "JEE Main",
+      "type": "ELIGIBLE_FOR",
+      "metadata": { "minimumPercentage": 75, "description": "Requires 75% aggregate in Class 12 board exams" }
+    },
+    {
+      "fromNodeName": "PCM",
+      "toNodeName": "BITSAT",
+      "type": "ELIGIBLE_FOR",
+      "metadata": { "minimumPercentage": 75, "description": "Requires 75% in PCM aggregate in Class 12" }
+    },
+    {
+      "fromNodeName": "PCM",
+      "toNodeName": "VITEEE",
+      "type": "ELIGIBLE_FOR",
+      "metadata": { "minimumPercentage": 60, "description": "Requires 60% in PCM aggregate in Class 12" }
+    },
+    {
+      "fromNodeName": "JEE Main",
+      "toNodeName": "JEE Advanced",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Top qualifiers of JEE Main are eligible for JEE Advanced" }
+    },
+    {
+      "fromNodeName": "JEE Advanced",
+      "toNodeName": "B.Tech CSE",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in IITs based on JEE Advanced cut-off ranks" }
+    },
+    {
+      "fromNodeName": "JEE Advanced",
+      "toNodeName": "B.Tech Mechanical",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in IITs based on JEE Advanced cut-off ranks" }
+    },
+    {
+      "fromNodeName": "JEE Advanced",
+      "toNodeName": "B.Tech Civil",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in IITs based on JEE Advanced cut-off ranks" }
+    },
+    {
+      "fromNodeName": "JEE Advanced",
+      "toNodeName": "B.Tech Electrical",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in IITs based on JEE Advanced cut-off ranks" }
+    },
+    {
+      "fromNodeName": "JEE Main",
+      "toNodeName": "B.Tech CSE",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in NITs, IIITs, and GFTIs based on JEE Main JoSAA rounds" }
+    },
+    {
+      "fromNodeName": "JEE Main",
+      "toNodeName": "B.Tech IT",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in NITs, IIITs, and GFTIs based on JEE Main JoSAA rounds" }
+    },
+    {
+      "fromNodeName": "JEE Main",
+      "toNodeName": "B.Tech Mechanical",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in NITs, IIITs, and GFTIs based on JEE Main JoSAA rounds" }
+    },
+    {
+      "fromNodeName": "JEE Main",
+      "toNodeName": "B.Tech Civil",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in NITs, IIITs, and GFTIs based on JEE Main JoSAA rounds" }
+    },
+    {
+      "fromNodeName": "JEE Main",
+      "toNodeName": "B.Tech Electrical",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in NITs, IIITs, and GFTIs based on JEE Main JoSAA rounds" }
+    },
+    {
+      "fromNodeName": "BITSAT",
+      "toNodeName": "B.Tech CSE",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in BITS Pilani campuses based on BITSAT score" }
+    },
+    {
+      "fromNodeName": "BITSAT",
+      "toNodeName": "B.Tech Mechanical",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in BITS Pilani campuses based on BITSAT score" }
+    },
+    {
+      "fromNodeName": "BITSAT",
+      "toNodeName": "B.Tech Civil",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in BITS Pilani campuses based on BITSAT score" }
+    },
+    {
+      "fromNodeName": "BITSAT",
+      "toNodeName": "B.Tech Electrical",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in BITS Pilani campuses based on BITSAT score" }
+    },
+    {
+      "fromNodeName": "VITEEE",
+      "toNodeName": "B.Tech CSE",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in VIT campuses based on VITEEE rank" }
+    },
+    {
+      "fromNodeName": "VITEEE",
+      "toNodeName": "B.Tech IT",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in VIT campuses based on VITEEE rank" }
+    },
+    {
+      "fromNodeName": "VITEEE",
+      "toNodeName": "B.Tech AI",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in VIT campuses based on VITEEE rank" }
+    },
+    {
+      "fromNodeName": "VITEEE",
+      "toNodeName": "B.Tech Mechanical",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in VIT campuses based on VITEEE rank" }
+    },
+    {
+      "fromNodeName": "VITEEE",
+      "toNodeName": "B.Tech Civil",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in VIT campuses based on VITEEE rank" }
+    },
+    {
+      "fromNodeName": "VITEEE",
+      "toNodeName": "B.Tech Electrical",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission in VIT campuses based on VITEEE rank" }
+    },
+    {
+      "fromNodeName": "B.Tech CSE",
+      "toNodeName": "Software Engineer",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Direct core software job profiles" }
+    },
+    {
+      "fromNodeName": "B.Tech CSE",
+      "toNodeName": "Cloud Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech CSE",
+      "toNodeName": "DevOps Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech IT",
+      "toNodeName": "Software Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech IT",
+      "toNodeName": "Cloud Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech IT",
+      "toNodeName": "DevOps Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech AI",
+      "toNodeName": "AI Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech AI",
+      "toNodeName": "Data Scientist",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech Mechanical",
+      "toNodeName": "Mechanical Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech Civil",
+      "toNodeName": "Civil Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech Electrical",
+      "toNodeName": "Software Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech Electrical",
+      "toNodeName": "DevOps Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Tech Electrical",
+      "toNodeName": "Mechanical Engineer",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Control systems and automation engineer tracks" }
+    },
+    {
+      "fromNodeName": "Software Engineer",
+      "toNodeName": "Programming",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Software Engineer",
+      "toNodeName": "DSA",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Software Engineer",
+      "toNodeName": "Databases",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Data Scientist",
+      "toNodeName": "Programming",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Data Scientist",
+      "toNodeName": "Databases",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Data Scientist",
+      "toNodeName": "Machine Learning",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "AI Engineer",
+      "toNodeName": "Programming",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "AI Engineer",
+      "toNodeName": "DSA",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "AI Engineer",
+      "toNodeName": "Machine Learning",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Cloud Engineer",
+      "toNodeName": "Programming",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Cloud Engineer",
+      "toNodeName": "Databases",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Cloud Engineer",
+      "toNodeName": "Cloud Computing",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "DevOps Engineer",
+      "toNodeName": "Programming",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "DevOps Engineer",
+      "toNodeName": "Cloud Computing",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Mechanical Engineer",
+      "toNodeName": "Programming",
+      "type": "REQUIRES",
+      "metadata": { "description": "Microcontroller programming and basic G-code instructions" }
+    },
+    {
+      "fromNodeName": "PCM",
+      "toNodeName": "NATA",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "NATA",
+      "toNodeName": "B.Arch",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission based on NATA score and board marks" }
+    },
+    {
+      "fromNodeName": "B.Arch",
+      "toNodeName": "Architect",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "PCM",
+      "toNodeName": "BCA",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "PCM",
+      "toNodeName": "B.Sc (Hons) in Mathematics",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "B.Sc (Hons) in Mathematics",
+      "toNodeName": "Data Analyst",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "BCA",
+      "toNodeName": "Software Engineer",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "Indian Institute of Technology Bombay",
+      "toNodeName": "B.Tech CSE",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "Indian Institute of Technology Bombay",
+      "toNodeName": "JEE Advanced",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Birla Institute of Technology and Science, Pilani",
+      "toNodeName": "B.Tech CSE",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "Birla Institute of Technology and Science, Pilani",
+      "toNodeName": "BITSAT",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Vellore Institute of Technology",
+      "toNodeName": "B.Tech CSE",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "Vellore Institute of Technology",
+      "toNodeName": "VITEEE",
+      "type": "REQUIRES"
+    }
+  ]
+}

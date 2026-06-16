@@ -1,0 +1,339 @@
+{
+  "nodes": [
+    {
+      "name": "Commerce with Mathematics",
+      "type": "SUBJECT_COMBINATION",
+      "description": "Accountancy, Business Studies, Economics, and Mathematics subject combination",
+      "subjects": ["Accountancy", "Business Studies", "Economics", "Mathematics"]
+    },
+    {
+      "name": "CA Foundation",
+      "type": "EXAM",
+      "conductingBody": "ICAI",
+      "website": "https://www.icai.org",
+      "frequency": "BI_ANNUAL",
+      "description": "Chartered Accountancy Foundation Examination, the entry-level test for the CA program"
+    },
+    {
+      "name": "CSEET",
+      "type": "EXAM",
+      "conductingBody": "ICSI",
+      "website": "https://www.icsi.edu",
+      "frequency": "OTHER",
+      "description": "CS Executive Entrance Test, the mandatory entry screening exam for the Company Secretary course"
+    },
+    {
+      "name": "CMA Foundation",
+      "type": "EXAM",
+      "conductingBody": "ICMAI",
+      "website": "https://icmai.in",
+      "frequency": "BI_ANNUAL",
+      "description": "Cost and Management Accountancy Foundation Examination, the entry-level test for the CMA program"
+    },
+    {
+      "name": "CAT",
+      "type": "EXAM",
+      "conductingBody": "IIMs",
+      "website": "https://iimcat.ac.in",
+      "frequency": "ANNUAL",
+      "description": "Common Admission Test for postgraduate management programs (MBA/PGDM) in Indian Institutes of Management"
+    },
+    {
+      "name": "B.Com",
+      "type": "DEGREE",
+      "durationYears": 3,
+      "level": "UG",
+      "description": "Bachelor of Commerce, focusing on accounting, statistics, mercantile law, and economics"
+    },
+    {
+      "name": "BBA",
+      "type": "DEGREE",
+      "durationYears": 3,
+      "level": "UG",
+      "description": "Bachelor of Business Administration, focusing on business management, marketing, and corporate administration"
+    },
+    {
+      "name": "MBA",
+      "type": "DEGREE",
+      "durationYears": 2,
+      "level": "PG",
+      "description": "Master of Business Administration, covering marketing, finance, human resources, and business strategy"
+    },
+    {
+      "name": "Chartered Accountant (CA)",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 800000, "max": 2400000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "Taxation & Auditing",
+      "description": "Professional specializing in financial audits, general ledger accounts, and direct/indirect taxation systems"
+    },
+    {
+      "name": "Company Secretary (CS)",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 600000, "max": 1800000, "currency": "INR" },
+      "growthRate": "MEDIUM",
+      "sector": "Corporate Governance",
+      "description": "Corporate professional ensuring company affairs comply with statutory and regulatory regulations"
+    },
+    {
+      "name": "Cost and Management Accountant (CMA)",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 600000, "max": 1800000, "currency": "INR" },
+      "growthRate": "MEDIUM",
+      "sector": "Cost Management",
+      "description": "Cost specialist managing corporate pricing matrices, ledger analysis, budget structures, and cost control systems"
+    },
+    {
+      "name": "Investment Banker",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 1200000, "max": 4000000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "Investment Banking",
+      "description": "Financial advisor helping clients raise capital, advising on mergers and acquisitions, and conducting corporate valuations"
+    },
+    {
+      "name": "Management Consultant",
+      "type": "OCCUPATION",
+      "averageSalaryRange": { "min": 1000000, "max": 3500000, "currency": "INR" },
+      "growthRate": "HIGH",
+      "sector": "Business Advisory",
+      "description": "Strategist helping organizations optimize operations, scale business parameters, and solve corporate problems"
+    },
+    {
+      "name": "Taxation & Auditing",
+      "type": "SKILL",
+      "category": "DOMAIN_SPECIFIC",
+      "description": "Statutory auditing, internal audit controls, corporate tax filing, and GST compliance"
+    },
+    {
+      "name": "Corporate Law & Compliance",
+      "type": "SKILL",
+      "category": "DOMAIN_SPECIFIC",
+      "description": "In-depth understanding of Companies Act, filing regulatory resolutions, and board meeting compliances"
+    },
+    {
+      "name": "Cost Accounting & Budgeting",
+      "type": "SKILL",
+      "category": "TECHNICAL",
+      "description": "Calculating operational overheads, standard costing metrics, variance analysis, and corporate budgeting"
+    },
+    {
+      "name": "Financial Valuation & Modeling",
+      "type": "SKILL",
+      "category": "TECHNICAL",
+      "description": "Building discounted cash flow models, LBO models, mergers and acquisitions modeling, and asset valuation"
+    },
+    {
+      "name": "Business Strategy & Consulting",
+      "type": "SKILL",
+      "category": "TECHNICAL",
+      "description": "Market analysis framework building, operational restructuring, and general business optimization models"
+    },
+    {
+      "name": "B.Com (Hons)",
+      "type": "DEGREE",
+      "durationYears": 3,
+      "level": "UG",
+      "description": "Bachelor of Commerce with Honors, focusing on specialized modules in accounting, taxation, and investment"
+    },
+    {
+      "name": "B.A. Economics (Hons)",
+      "type": "DEGREE",
+      "durationYears": 3,
+      "level": "UG",
+      "description": "Bachelor of Arts in Economics with Honors covering microeconomics, macroeconomics, and econometrics"
+    },
+    {
+      "name": "Shri Ram College of Commerce (SRCC) Delhi",
+      "type": "INSTITUTE",
+      "location": { "city": "Delhi", "state": "Delhi" },
+      "ownership": "GOVERNMENT",
+      "nirfRanking": 19,
+      "category": "Commerce",
+      "description": "Premier constituent college of Delhi University specialized in commerce and economics"
+    },
+    {
+      "name": "Indian Institute of Management Ahmedabad",
+      "type": "INSTITUTE",
+      "location": { "city": "Ahmedabad", "state": "Gujarat" },
+      "ownership": "GOVERNMENT",
+      "nirfRanking": 1,
+      "category": "Management",
+      "description": "Premier post-graduate business school in India recognized globally for executive management"
+    }
+  ],
+  "relationships": [
+    {
+      "fromNodeName": "Commerce Stream",
+      "toNodeName": "Commerce with Mathematics",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "Commerce with Mathematics",
+      "toNodeName": "B.Com",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "Commerce with Mathematics",
+      "toNodeName": "BBA",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "Commerce with Mathematics",
+      "toNodeName": "CA Foundation",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "Commerce with Mathematics",
+      "toNodeName": "CSEET",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "Commerce with Mathematics",
+      "toNodeName": "CMA Foundation",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "B.Com",
+      "toNodeName": "CAT",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "BBA",
+      "toNodeName": "CAT",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "CAT",
+      "toNodeName": "MBA",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Admission based on CAT percentile cutoffs and interview rounds" }
+    },
+    {
+      "fromNodeName": "CA Foundation",
+      "toNodeName": "Chartered Accountant (CA)",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Requires clearing CA Intermediate, 2 years of Articleship, and CA Final exams" }
+    },
+    {
+      "fromNodeName": "CSEET",
+      "toNodeName": "Company Secretary (CS)",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Requires clearing CS Executive, 21 months of training, and CS Professional exams" }
+    },
+    {
+      "fromNodeName": "CMA Foundation",
+      "toNodeName": "Cost and Management Accountant (CMA)",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Requires clearing CMA Intermediate, 15 months of training, and CMA Final exams" }
+    },
+    {
+      "fromNodeName": "B.Com",
+      "toNodeName": "Investment Banker",
+      "type": "LEADS_TO",
+      "metadata": { "description": "Usually requires professional financial analyst training or top college placement" }
+    },
+    {
+      "fromNodeName": "B.Com",
+      "toNodeName": "CA Foundation",
+      "type": "ELIGIBLE_FOR",
+      "metadata": { "description": "Graduates can also opt for CA Direct Entry Scheme bypassing Foundation" }
+    },
+    {
+      "fromNodeName": "B.Com",
+      "toNodeName": "CSEET",
+      "type": "ELIGIBLE_FOR",
+      "metadata": { "description": "Graduates with 50% marks are exempted from CSEET and can directly enter CS Executive" }
+    },
+    {
+      "fromNodeName": "MBA",
+      "toNodeName": "Investment Banker",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "MBA",
+      "toNodeName": "Management Consultant",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "Chartered Accountant (CA)",
+      "toNodeName": "Taxation & Auditing",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Company Secretary (CS)",
+      "toNodeName": "Corporate Law & Compliance",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Cost and Management Accountant (CMA)",
+      "toNodeName": "Cost Accounting & Budgeting",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Investment Banker",
+      "toNodeName": "Financial Valuation & Modeling",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Management Consultant",
+      "toNodeName": "Business Strategy & Consulting",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Commerce with Mathematics",
+      "toNodeName": "B.Com (Hons)",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "Commerce with Mathematics",
+      "toNodeName": "B.A. Economics (Hons)",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "B.Com (Hons)",
+      "toNodeName": "Investment Banker",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.A. Economics (Hons)",
+      "toNodeName": "Investment Banker",
+      "type": "LEADS_TO"
+    },
+    {
+      "fromNodeName": "B.Com (Hons)",
+      "toNodeName": "CAT",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "B.A. Economics (Hons)",
+      "toNodeName": "CAT",
+      "type": "ELIGIBLE_FOR"
+    },
+    {
+      "fromNodeName": "Shri Ram College of Commerce (SRCC) Delhi",
+      "toNodeName": "B.Com (Hons)",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "Shri Ram College of Commerce (SRCC) Delhi",
+      "toNodeName": "B.A. Economics (Hons)",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "Shri Ram College of Commerce (SRCC) Delhi",
+      "toNodeName": "CUET UG (Arts & Humanities)",
+      "type": "REQUIRES"
+    },
+    {
+      "fromNodeName": "Indian Institute of Management Ahmedabad",
+      "toNodeName": "MBA",
+      "type": "OFFERS"
+    },
+    {
+      "fromNodeName": "Indian Institute of Management Ahmedabad",
+      "toNodeName": "CAT",
+      "type": "REQUIRES"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend API and graph services for Career Atlas",
+  "main": "dist/app.js",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "start": "node dist/app.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "seed": "ts-node src/seeds/master-importer.ts",
+    "seed:rules": "ts-node src/seeds/seed-rules.ts",
+    "seed:mappings": "ts-node src/seeds/seed-institute-courses.ts",
+    "seed:exams": "ts-node src/seeds/seed-exams-metadata.ts",
+    "seed:engineering": "ts-node src/seeds/seed-engineering.ts",
+    "seed:medical": "ts-node src/seeds/seed-medical.ts",
+    "seed:commerce": "ts-node src/seeds/seed-commerce.ts",
+    "seed:law": "ts-node src/seeds/seed-law.ts",
+    "seed:defence": "ts-node src/seeds/seed-defence.ts",
+    "seed:design": "ts-node src/seeds/seed-design.ts",
+    "seed:government": "ts-node src/seeds/seed-government.ts",
+    "seed:arts": "ts-node src/seeds/seed-arts.ts",
+    "seed:hospitality": "ts-node src/seeds/seed-hospitality.ts",
+    "seed:agriculture": "ts-node src/seeds/seed-agriculture.ts",
+    "test-graph": "ts-node src/testGraph.ts",
+    "test-roadmap": "ts-node src/testRoadmap.ts",
+    "test-eligibility": "ts-node src/testEligibility.ts",
+    "test-mappings": "ts-node src/testMappings.ts",
+    "test-exams": "ts-node src/testExamEngine.ts",
+    "test-recs": "ts-node src/testRecommendations.ts",
+    "test-validation": "ts-node src/testValidation.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "mongoose": "^8.4.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.14.2",
+    "rimraf": "^5.0.7",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
+  }
+}
