@@ -1,47 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <defs>
-    <!-- Gradients -->
-    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6366f1" />
-      <stop offset="50%" stop-color="#a855f7" />
-      <stop offset="100%" stop-color="#06b6d4" />
-    </linearGradient>
-    <linearGradient id="nodeGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#06b6d4" />
-      <stop offset="100%" stop-color="#6366f1" />
-    </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="16" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-  </defs>
-
-  <!-- Glowing outer circle representing the compass ring / globe -->
-  <circle cx="256" cy="256" r="210" fill="none" stroke="url(#ringGrad)" stroke-width="20" opacity="0.15" filter="url(#glow)" />
-  <circle cx="256" cy="256" r="210" fill="none" stroke="url(#ringGrad)" stroke-width="12" />
-
-  <!-- Compass markings (tick marks around the ring) -->
-  <circle cx="256" cy="256" r="180" fill="none" stroke="#6366f1" stroke-width="4" stroke-dasharray="8,24" opacity="0.4" />
-
-  <!-- Directional arrow / compass needle pointing North-East, stylized as a path -->
-  <g filter="url(#glow)">
-    <!-- Pathway Connections (glowing lines) -->
-    <line x1="170" y1="342" x2="256" y2="256" stroke="url(#ringGrad)" stroke-width="14" stroke-linecap="round" />
-    <line x1="256" y1="256" x2="342" y2="170" stroke="url(#ringGrad)" stroke-width="14" stroke-linecap="round" />
-    <!-- Arrow tip for the path -->
-    <path d="M300 170 H342 V212" fill="none" stroke="url(#ringGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
-    
-    <!-- Pathway Nodes -->
-    <!-- Start Node (Class 8 / School level) -->
-    <circle cx="170" cy="342" r="26" fill="#0b0f19" stroke="url(#nodeGrad)" stroke-width="10" />
-    <circle cx="170" cy="342" r="10" fill="#06b6d4" />
-    
-    <!-- Middle Node (Higher Secondary / Degree College) -->
-    <circle cx="256" cy="256" r="32" fill="#0b0f19" stroke="url(#nodeGrad)" stroke-width="10" />
-    <circle cx="256" cy="256" r="14" fill="#a855f7" />
-    
-    <!-- End Node (Career / Destination) -->
-    <circle cx="342" cy="170" r="26" fill="#0b0f19" stroke="url(#nodeGrad)" stroke-width="10" />
-    <circle cx="342" cy="170" r="10" fill="#6366f1" />
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none">
+  <!-- Outer circle -->
+  <circle cx="256" cy="256" r="210" stroke="#06B6D4" stroke-width="40" />
+  
+  <!-- Symmetrical compass needle pointing Northeast/Southwest -->
+  <polygon 
+    points="346.45,165.55 301.23,301.23 165.55,346.45 210.77,210.77" 
+    stroke="#06B6D4" 
+    stroke-width="40" 
+    stroke-linejoin="round" 
+    fill="none" 
+  />
 </svg>
