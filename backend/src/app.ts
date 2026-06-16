@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -21,7 +22,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Security and utility middleware
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // Allow loading frontend scripts, stylesheets, and Google Identity Services SDK
+  })
+);
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
@@ -40,6 +45,19 @@ app.use('/api/v1/suggestions', suggestionRouter);
 // Base health check
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date() });
+});
+
+// Serve frontend static assets in production
+const frontendBuildPath = path.join(__dirname, '../../frontend/dist');
+app.use(express.static(frontendBuildPath));
+
+// Fallback all other routes to frontend SPA router (index.html)
+app.get('*', (req, res, next) => {
+  // Skip API or health endpoints so they return 404 rather than the HTML page
+  if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
+    return next();
+  }
+  res.sendFile(path.join(frontendBuildPath, 'index.html'));
 });
 
 // Error handling middleware
