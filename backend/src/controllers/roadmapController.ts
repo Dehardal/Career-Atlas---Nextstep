@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { RoadmapEngine } from '../services/roadmapEngine';
 import { NodeModel } from '../models/Node';
+import { CacheService } from '../services/cacheService';
 
 export class RoadmapController {
   /**
@@ -82,12 +83,24 @@ export class RoadmapController {
         return;
       }
 
-      const depth = maxDepth ? parseInt(maxDepth as string, 10) : 8;
+      const depth = maxDepth ? parseInt(maxDepth as string, 10) : 7;
+
+      // 1. Try to read from Cache first
+      const cachedPaths = CacheService.get(fromNodeId as string, toNodeId as string, depth);
+      if (cachedPaths) {
+        res.status(200).json({ paths: cachedPaths });
+        return;
+      }
+
+      // 2. Compute path dynamically
       const paths = await RoadmapEngine.findAlternativePaths(
         fromNodeId as string,
         toNodeId as string,
         depth
       );
+
+      // 3. Save result to cache
+      CacheService.set(fromNodeId as string, toNodeId as string, depth, paths);
 
       res.status(200).json({ paths });
     } catch (error) {

@@ -10,7 +10,7 @@ export class EligibilityService {
   static validateTransitionSync(
     currentPathNodes: INode[],
     nextNode: INode,
-    rules: IEligibilityRule[]
+    rules: IEligibilityRule[] | Map<string, IEligibilityRule[]>
   ): boolean {
     const nextNodeId = nextNode._id.toString();
     const pathNodeIds = new Set(currentPathNodes.map((n) => n._id.toString()));
@@ -30,12 +30,17 @@ export class EligibilityService {
     });
 
     // Get all rules targeting the nextNode
-    const targetRules = rules.filter((rule) => {
-      const targetId = typeof rule.targetNode === 'string' 
-        ? rule.targetNode 
-        : (rule.targetNode as any)._id?.toString() || rule.targetNode.toString();
-      return targetId === nextNodeId;
-    });
+    let targetRules: IEligibilityRule[];
+    if (rules instanceof Map) {
+      targetRules = (rules as Map<string, IEligibilityRule[]>).get(nextNodeId) || [];
+    } else {
+      targetRules = (rules as IEligibilityRule[]).filter((rule) => {
+        const targetId = typeof rule.targetNode === 'string' 
+          ? rule.targetNode 
+          : (rule.targetNode as any)._id?.toString() || rule.targetNode.toString();
+        return targetId === nextNodeId;
+      });
+    }
 
     // If no rules are defined for this target node, it is allowed by default
     if (targetRules.length === 0) {

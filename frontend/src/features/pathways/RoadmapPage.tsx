@@ -25,6 +25,7 @@ import type { Node as ApiNode, Relationship, InstituteCourseMapping } from '../.
 import PathwayMap from '../../components/graph/PathwayMap';
 import { CustomDropdown } from '../../components/common/CustomDropdown';
 import { AuthModal } from '../../components/auth/AuthModal';
+import { PathwayLoader } from '../../components/graph/PathwayLoader';
 
 export const RoadmapPage: React.FC = () => {
   const navigate = useNavigate();
@@ -380,6 +381,11 @@ export const RoadmapPage: React.FC = () => {
                 </span>
               </div>
             </div>
+          ) : (loading && (
+            (viewMode === 'EXPLORER' && explorerNodes.length === 0) ||
+            (viewMode === 'PATH' && pathways.length === 0)
+          )) ? (
+            <PathwayLoader />
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4 bg-slate-50 dark:bg-[#080C14]">
               <Map className="w-16 h-16 text-slate-300 dark:text-slate-700 animate-pulse" />

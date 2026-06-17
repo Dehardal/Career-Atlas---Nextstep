@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { SuggestionModel, SuggestionStatus, SuggestionType } from '../models/Suggestion';
 import { NodeModel, NodeType } from '../models/Node';
+import { CacheService } from '../services/cacheService';
 
 export class SuggestionController {
   /**
@@ -212,6 +213,10 @@ export class SuggestionController {
       }
 
       await suggestion.save();
+
+      if (status === SuggestionStatus.Approved) {
+        CacheService.clear();
+      }
 
       res.status(200).json({
         message: `Suggestion successfully ${status.toLowerCase()}`,

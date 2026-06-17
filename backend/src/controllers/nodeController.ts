@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { NodeModel, NodeType } from '../models/Node';
 import { RelationshipModel } from '../models/Relationship';
+import { CacheService } from '../services/cacheService';
 
 export class NodeController {
   /**
@@ -16,6 +17,7 @@ export class NodeController {
 
       const node = new NodeModel(req.body);
       const savedNode = await node.save();
+      CacheService.clear();
       res.status(201).json(savedNode);
     } catch (error: any) {
       if (error.name === 'ValidationError') {
@@ -104,6 +106,7 @@ export class NodeController {
       // Apply updates
       Object.assign(node, req.body);
       const updatedNode = await node.save();
+      CacheService.clear();
       res.status(200).json(updatedNode);
     } catch (error: any) {
       if (error.name === 'ValidationError') {
@@ -136,6 +139,8 @@ export class NodeController {
 
       // Delete the node itself
       await NodeModel.deleteOne({ _id: node._id });
+
+      CacheService.clear();
 
       res.status(200).json({
         message: 'Node and all adjacent relationships deleted successfully',

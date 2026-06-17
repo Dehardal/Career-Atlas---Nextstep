@@ -12,7 +12,63 @@ export interface RoadmapPath {
   steps: RoadmapStep[];
 }
 
+interface InMemoryGraph {
+  nodes: Map<string, INode>;
+  outgoing: Map<string, IRelationship[]>;
+  incoming: Map<string, IRelationship[]>;
+}
+
 export class RoadmapEngine {
+  private static cachedGraph: InMemoryGraph | null = null;
+  private static cachedRules: Map<string, any[]> | null = null;
+
+  /**
+   * Clears the globally cached graph and rules in memory
+   */
+  public static clearGraphCache(): void {
+    RoadmapEngine.cachedGraph = null;
+    RoadmapEngine.cachedRules = null;
+    console.log('RoadmapEngine cached graph and rules cleared.');
+  }
+
+  /**
+   * Helper to load the entire graph from MongoDB into memory
+   */
+  static async loadGraphInMemory(): Promise<InMemoryGraph> {
+    if (RoadmapEngine.cachedGraph) {
+      return RoadmapEngine.cachedGraph;
+    }
+
+    const nodesList = await NodeModel.find({});
+    const relsList = await RelationshipModel.find({});
+    
+    const nodes = new Map<string, INode>();
+    const outgoing = new Map<string, IRelationship[]>();
+    const incoming = new Map<string, IRelationship[]>();
+    
+    for (const node of nodesList) {
+      nodes.set(node._id.toString(), node);
+    }
+    
+    for (const rel of relsList) {
+      const fromId = rel.fromNode.toString();
+      const toId = rel.toNode.toString();
+      
+      if (!outgoing.has(fromId)) {
+        outgoing.set(fromId, []);
+      }
+      outgoing.get(fromId)!.push(rel);
+      
+      if (!incoming.has(toId)) {
+        incoming.set(toId, []);
+      }
+      incoming.get(toId)!.push(rel);
+    }
+    
+    RoadmapEngine.cachedGraph = { nodes, outgoing, incoming };
+    return RoadmapEngine.cachedGraph;
+  }
+
   /**
    * Traverse outgoing relationships level-by-level using BFS.
    * Returns a map of reachable nodes grouped by their depth/level from the start node.
@@ -25,7 +81,6 @@ export class RoadmapEngine {
     const result: Record<number, INode[]> = {};
     const visited = new Set<string>();
     
-    // Queue stores { nodeId: ObjectId, depth: number }
     const queue: Array<{ id: mongoose.Types.ObjectId; depth: number }> = [
       { id: startObjId, depth: 0 }
     ];
@@ -44,7 +99,6 @@ export class RoadmapEngine {
 
       if (depth >= maxDepth) continue;
 
-      // Find all outgoing relationships
       const relationships = await RelationshipModel.find({ fromNode: id });
       
       for (const rel of relationships) {
@@ -62,12 +116,14 @@ export class RoadmapEngine {
   /**
    * Resolves transitions by checking if they are blocked solely by missing exams.
    * If so, returns the steps to insert. Otherwise returns null.
+   * This is fully synchronous using the preloaded in-memory graph.
    */
-  static async resolveTransitionSteps(
+  static resolveTransitionStepsSync(
     currentPath: RoadmapStep[],
     nextNode: INode,
-    rules: any[]
-  ): Promise<RoadmapStep[] | null> {
+    rules: any[] | Map<string, any[]>,
+    graph: InMemoryGraph
+  ): RoadmapStep[] | null {
     const currentPathNodes = currentPath.map((s) => s.node);
     const isDirectlyEligible = EligibilityService.validateTransitionSync(currentPathNodes, nextNode, rules);
     if (isDirectlyEligible) {
@@ -78,10 +134,17 @@ export class RoadmapEngine {
     const pathNodeIds = new Set(currentPathNodes.map((n) => n._id.toString()));
 
     // 0. Pre-check if any BLOCK rule forbids this transition for any node in the path
-    const blockRules = rules.filter((r) => {
-      const targetId = typeof r.targetNode === 'string' ? r.targetNode : r.targetNode?._id?.toString();
-      return targetId === nextNodeId && r.ruleType === 'BLOCK';
-    });
+    let targetRules: any[];
+    if (rules instanceof Map) {
+      targetRules = rules.get(nextNodeId) || [];
+    } else {
+      targetRules = rules.filter((r) => {
+        const targetId = typeof r.targetNode === 'string' ? r.targetNode : r.targetNode?._id?.toString();
+        return targetId === nextNodeId;
+      });
+    }
+
+    const blockRules = targetRules.filter((r) => r.ruleType === 'BLOCK');
     for (const rule of blockRules) {
       const sourceId = typeof rule.sourceNode === 'string' ? rule.sourceNode : rule.sourceNode?._id?.toString();
       if (pathNodeIds.has(sourceId)) {
@@ -89,16 +152,13 @@ export class RoadmapEngine {
       }
     }
 
-    const targetRules = rules.filter((r) => {
-      const targetId = typeof r.targetNode === 'string' ? r.targetNode : r.targetNode?._id?.toString();
-      return targetId === nextNodeId && r.ruleType === 'ALLOW';
-    });
+    const allowRules = targetRules.filter((r) => r.ruleType === 'ALLOW');
 
-    if (targetRules.length === 0) {
+    if (allowRules.length === 0) {
       return null;
     }
 
-    for (const rule of targetRules) {
+    for (const rule of allowRules) {
       const sourceId = typeof rule.sourceNode === 'string' ? rule.sourceNode : rule.sourceNode?._id?.toString();
       if (!pathNodeIds.has(sourceId)) {
         continue;
@@ -133,14 +193,30 @@ export class RoadmapEngine {
         });
 
         if (missingExamIds.length > 0) {
-          const examNodes = await NodeModel.find({ _id: { $in: missingExamIds } });
-          const insertedSteps: RoadmapStep[] = [];
+          const examNodes = missingExamIds
+            .map((id: any) => graph.nodes.get(id.toString() || id))
+            .filter(Boolean) as INode[];
+            
           let currentSourceNode = currentPath[currentPath.length - 1].node;
 
-          const examRelationships = await RelationshipModel.find({
-            fromNode: { $in: [currentSourceNode._id, ...missingExamIds] },
-            toNode: { $in: [...missingExamIds, nextNode._id] }
-          });
+          const searchNodeIds = new Set([
+            currentSourceNode._id.toString(),
+            ...missingExamIds.map((id: any) => id.toString() || id)
+          ]);
+          const targetNodeIds = new Set([
+            ...missingExamIds.map((id: any) => id.toString() || id),
+            nextNode._id.toString()
+          ]);
+
+          const examRelationships: IRelationship[] = [];
+          for (const fromId of searchNodeIds) {
+            const rels = graph.outgoing.get(fromId) || [];
+            for (const r of rels) {
+              if (targetNodeIds.has(r.toNode.toString())) {
+                examRelationships.push(r);
+              }
+            }
+          }
 
           const orderedExams: INode[] = [];
           const remainingExams = [...examNodes];
@@ -164,6 +240,8 @@ export class RoadmapEngine {
             }
           }
 
+          const insertedSteps: RoadmapStep[] = [];
+          
           for (let i = 0; i < orderedExams.length; i++) {
             const examNode = orderedExams[i];
             let rel = examRelationships.find((r) => 
@@ -172,12 +250,13 @@ export class RoadmapEngine {
             );
 
             if (!rel) {
-              rel = new RelationshipModel({
+              rel = {
+                _id: new mongoose.Types.ObjectId().toString(),
                 fromNode: currentSourceNode._id,
                 toNode: examNode._id,
                 type: RelationshipType.EligibleFor,
                 metadata: { description: `Required entrance exam for ${nextNode.name}` }
-              }) as any;
+              } as any;
             }
 
             insertedSteps.push({
@@ -194,12 +273,13 @@ export class RoadmapEngine {
           );
 
           if (!finalRel) {
-            finalRel = new RelationshipModel({
+            finalRel = {
+              _id: new mongoose.Types.ObjectId().toString(),
               fromNode: currentSourceNode._id,
               toNode: nextNode._id,
               type: RelationshipType.LeadsTo,
               metadata: { description: `Admission based on exam score` }
-            }) as any;
+            } as any;
           }
 
           insertedSteps.push({
@@ -215,6 +295,47 @@ export class RoadmapEngine {
     return null;
   }
 
+  static async loadRulesIndexed(): Promise<Map<string, any[]>> {
+    if (RoadmapEngine.cachedRules) {
+      return RoadmapEngine.cachedRules;
+    }
+    const rawRules = await EligibilityService.getAllRulesRaw();
+    const rulesMap = new Map<string, any[]>();
+    for (const rule of rawRules) {
+      const targetId = typeof rule.targetNode === 'string' 
+        ? rule.targetNode 
+        : (rule.targetNode as any)._id?.toString() || rule.targetNode.toString();
+      if (!rulesMap.has(targetId)) {
+        rulesMap.set(targetId, []);
+      }
+      rulesMap.get(targetId)!.push(rule);
+    }
+    RoadmapEngine.cachedRules = rulesMap;
+    return RoadmapEngine.cachedRules;
+  }
+
+  /**
+   * Backward-compatible async wrapper to resolve transition steps using preloaded graph.
+   */
+  static async resolveTransitionSteps(
+    currentPath: RoadmapStep[],
+    nextNode: INode,
+    rules: any[]
+  ): Promise<RoadmapStep[] | null> {
+    const graph = await RoadmapEngine.loadGraphInMemory();
+    const rulesMap = new Map<string, any[]>();
+    for (const rule of rules) {
+      const targetId = typeof rule.targetNode === 'string' 
+        ? rule.targetNode 
+        : (rule.targetNode as any)._id?.toString() || rule.targetNode.toString();
+      if (!rulesMap.has(targetId)) {
+        rulesMap.set(targetId, []);
+      }
+      rulesMap.get(targetId)!.push(rule);
+    }
+    return RoadmapEngine.resolveTransitionStepsSync(currentPath, nextNode, rulesMap, graph);
+  }
+
   /**
    * Finds the shortest path (fewest hops) between a start and target node using BFS.
    * Returns an array of node steps and their linking relationships.
@@ -227,12 +348,13 @@ export class RoadmapEngine {
     const targetObjId = new mongoose.Types.ObjectId(toNodeId);
     const visited = new Set<string>();
 
-    const startNode = await NodeModel.findById(startObjId);
+    const graph = await RoadmapEngine.loadGraphInMemory();
+
+    const startNode = graph.nodes.get(startObjId.toString());
     if (!startNode) return null;
 
-    const rules = await EligibilityService.getAllRulesRaw();
+    const rules = await RoadmapEngine.loadRulesIndexed();
 
-    // Queue stores paths: Array of steps traversed
     const queue: Array<RoadmapStep[]> = [
       [{ node: startNode }]
     ];
@@ -241,34 +363,33 @@ export class RoadmapEngine {
     while (queue.length > 0) {
       const currentPath = queue.shift()!;
       const lastStep = currentPath[currentPath.length - 1];
-      const currentNodeId = lastStep.node._id as mongoose.Types.ObjectId;
+      const currentNodeId = lastStep.node._id.toString();
 
-      if (currentNodeId.toString() === targetObjId.toString()) {
+      if (currentNodeId === targetObjId.toString()) {
         return { steps: currentPath };
       }
 
-      const relationships = await RelationshipModel.find({ fromNode: currentNodeId }).populate('toNode');
+      const relationships = graph.outgoing.get(currentNodeId) || [];
       
       for (const rel of relationships) {
-        const nextNode = rel.toNode as unknown as INode;
+        const nextNodeId = rel.toNode.toString();
+        const nextNode = graph.nodes.get(nextNodeId);
         if (!nextNode) continue;
 
-        // Perform eligibility validation check before pushing to queue
         const currentPathNodes = currentPath.map((step) => step.node);
         const isEligible = EligibilityService.validateTransitionSync(currentPathNodes, nextNode, rules);
         
         let insertedSteps: RoadmapStep[] | null = null;
         if (!isEligible) {
-          insertedSteps = await RoadmapEngine.resolveTransitionSteps(currentPath, nextNode, rules);
+          insertedSteps = RoadmapEngine.resolveTransitionStepsSync(currentPath, nextNode, rules, graph);
           if (!insertedSteps) continue;
         }
         
-        const nextIdStr = nextNode._id.toString();
-        if (!visited.has(nextIdStr)) {
+        if (!visited.has(nextNodeId)) {
           if (insertedSteps) {
             insertedSteps.forEach((step) => visited.add(step.node._id.toString()));
           }
-          visited.add(nextIdStr);
+          visited.add(nextNodeId);
           
           const nextPath = [
             ...currentPath.slice(0, currentPath.length - 1),
@@ -291,55 +412,56 @@ export class RoadmapEngine {
   static async findAlternativePaths(
     fromNodeId: string,
     toNodeId: string,
-    maxDepth: number = 8
+    maxDepth: number = 7
   ): Promise<RoadmapPath[]> {
     const startObjId = new mongoose.Types.ObjectId(fromNodeId);
     const targetObjId = new mongoose.Types.ObjectId(toNodeId);
+    
+    const graph = await RoadmapEngine.loadGraphInMemory();
+    
+    const startNode = graph.nodes.get(startObjId.toString());
+    if (!startNode) return [];
+    
+    const rules = await RoadmapEngine.loadRulesIndexed();
     const results: RoadmapPath[] = [];
 
-    const startNode = await NodeModel.findById(startObjId);
-    if (!startNode) return [];
-
-    const rules = await EligibilityService.getAllRulesRaw();
-
-    const dfs = async (
-      currentNodeId: mongoose.Types.ObjectId,
+    const dfs = (
+      currentNodeId: string,
       currentSteps: RoadmapStep[],
       visited: Set<string>,
       depth: number
     ) => {
       if (depth > maxDepth) return;
 
-      if (currentNodeId.toString() === targetObjId.toString()) {
+      if (currentNodeId === targetObjId.toString()) {
         results.push({ steps: [...currentSteps] });
         return;
       }
 
-      visited.add(currentNodeId.toString());
+      visited.add(currentNodeId);
 
-      const relationships = await RelationshipModel.find({ fromNode: currentNodeId }).populate('toNode');
+      const relationships = graph.outgoing.get(currentNodeId) || [];
 
       for (const rel of relationships) {
-        const nextNode = rel.toNode as unknown as INode;
+        const nextNodeId = rel.toNode.toString();
+        const nextNode = graph.nodes.get(nextNodeId);
         if (!nextNode) continue;
 
-        // Perform eligibility validation check before continuing search branch
         const currentPathNodes = currentSteps.map((step) => step.node);
         const isEligible = EligibilityService.validateTransitionSync(currentPathNodes, nextNode, rules);
         
         let insertedSteps: RoadmapStep[] | null = null;
         if (!isEligible) {
-          insertedSteps = await RoadmapEngine.resolveTransitionSteps(currentSteps, nextNode, rules);
+          insertedSteps = RoadmapEngine.resolveTransitionStepsSync(currentSteps, nextNode, rules, graph);
           if (!insertedSteps) continue;
         }
 
-        const nextIdStr = nextNode._id.toString();
-        if (!visited.has(nextIdStr)) {
+        if (!visited.has(nextNodeId)) {
           const nextVisited = new Set(visited);
           if (insertedSteps) {
             insertedSteps.forEach((step) => nextVisited.add(step.node._id.toString()));
           }
-          nextVisited.add(nextIdStr);
+          nextVisited.add(nextNodeId);
 
           const stepsWithEdge = [
             ...currentSteps.slice(0, currentSteps.length - 1),
@@ -347,8 +469,8 @@ export class RoadmapEngine {
             { node: nextNode }
           ];
 
-          await dfs(
-            nextNode._id as mongoose.Types.ObjectId,
+          dfs(
+            nextNodeId,
             stepsWithEdge,
             nextVisited,
             depth + (insertedSteps ? insertedSteps.length : 1)
@@ -357,9 +479,8 @@ export class RoadmapEngine {
       }
     };
 
-    await dfs(startObjId, [{ node: startNode }], new Set<string>(), 0);
+    dfs(startObjId.toString(), [{ node: startNode }], new Set<string>(), 0);
 
-    // Sort pathways by path length (shortest paths first)
     return results.sort((a, b) => a.steps.length - b.steps.length);
   }
 
@@ -369,18 +490,20 @@ export class RoadmapEngine {
    */
   static async getReachableCareers(
     startNodeId: string,
-    maxDepth: number = 8
+    maxDepth: number = 7
   ): Promise<RoadmapPath[]> {
     const startObjId = new mongoose.Types.ObjectId(startNodeId);
-    const results: RoadmapPath[] = [];
-
-    const startNode = await NodeModel.findById(startObjId);
+    
+    const graph = await RoadmapEngine.loadGraphInMemory();
+    
+    const startNode = graph.nodes.get(startObjId.toString());
     if (!startNode) return [];
 
-    const rules = await EligibilityService.getAllRulesRaw();
+    const rules = await RoadmapEngine.loadRulesIndexed();
+    const results: RoadmapPath[] = [];
 
-    const dfs = async (
-      currentNodeId: mongoose.Types.ObjectId,
+    const dfs = (
+      currentNodeId: string,
       currentSteps: RoadmapStep[],
       visited: Set<string>,
       depth: number
@@ -389,19 +512,17 @@ export class RoadmapEngine {
 
       const currentNode = currentSteps[currentSteps.length - 1].node;
 
-      // If it terminates at an occupation, capture this path
       if (currentNode.type === NodeType.Occupation) {
         results.push({ steps: [...currentSteps] });
-        // We can still continue traversing to check if there are further paths, 
-        // but typically occupations are sink nodes in educational pathways.
       }
 
-      visited.add(currentNodeId.toString());
+      visited.add(currentNodeId);
 
-      const relationships = await RelationshipModel.find({ fromNode: currentNodeId }).populate('toNode');
+      const relationships = graph.outgoing.get(currentNodeId) || [];
 
       for (const rel of relationships) {
-        const nextNode = rel.toNode as unknown as INode;
+        const nextNodeId = rel.toNode.toString();
+        const nextNode = graph.nodes.get(nextNodeId);
         if (!nextNode) continue;
 
         const currentPathNodes = currentSteps.map((step) => step.node);
@@ -409,17 +530,16 @@ export class RoadmapEngine {
         
         let insertedSteps: RoadmapStep[] | null = null;
         if (!isEligible) {
-          insertedSteps = await RoadmapEngine.resolveTransitionSteps(currentSteps, nextNode, rules);
+          insertedSteps = RoadmapEngine.resolveTransitionStepsSync(currentSteps, nextNode, rules, graph);
           if (!insertedSteps) continue;
         }
 
-        const nextIdStr = nextNode._id.toString();
-        if (!visited.has(nextIdStr)) {
+        if (!visited.has(nextNodeId)) {
           const nextVisited = new Set(visited);
           if (insertedSteps) {
             insertedSteps.forEach((step) => nextVisited.add(step.node._id.toString()));
           }
-          nextVisited.add(nextIdStr);
+          nextVisited.add(nextNodeId);
 
           const stepsWithEdge = [
             ...currentSteps.slice(0, currentSteps.length - 1),
@@ -427,8 +547,8 @@ export class RoadmapEngine {
             { node: nextNode }
           ];
 
-          await dfs(
-            nextNode._id as mongoose.Types.ObjectId,
+          dfs(
+            nextNodeId,
             stepsWithEdge,
             nextVisited,
             depth + (insertedSteps ? insertedSteps.length : 1)
@@ -437,7 +557,7 @@ export class RoadmapEngine {
       }
     };
 
-    await dfs(startObjId, [{ node: startNode }], new Set<string>(), 0);
+    dfs(startObjId.toString(), [{ node: startNode }], new Set<string>(), 0);
     return results;
   }
 }

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { RelationshipModel, RelationshipType } from '../models/Relationship';
 import { NodeModel } from '../models/Node';
+import { CacheService } from '../services/cacheService';
 
 export class RelationshipController {
   /**
@@ -47,6 +48,7 @@ export class RelationshipController {
 
       const relationship = new RelationshipModel({ fromNode, toNode, type, metadata });
       const savedRelationship = await relationship.save();
+      CacheService.clear();
       res.status(201).json(savedRelationship);
     } catch (error: any) {
       if (error.code === 11000) {
@@ -94,6 +96,7 @@ export class RelationshipController {
         res.status(404).json({ error: 'Relationship not found' });
         return;
       }
+      CacheService.clear();
       res.status(200).json({ message: 'Relationship deleted successfully' });
     } catch (error) {
       next(error);
