@@ -30,6 +30,7 @@ import { PathwayLoader } from '../../components/graph/PathwayLoader';
 export const RoadmapPage: React.FC = () => {
   const navigate = useNavigate();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const hasInitialized = React.useRef(false);
   const {
     startNode,
     targetNode,
@@ -55,6 +56,11 @@ export const RoadmapPage: React.FC = () => {
   const [qualifications, setQualifications] = useState<ApiNode[]>([]);
   const [careers, setCareers] = useState<ApiNode[]>([]);
   const [selectedNode, setSelectedNode] = useState<ApiNode | null>(null);
+
+  // Class 12 Stream selection state
+  const [selectedLevelNode, setSelectedLevelNode] = useState<ApiNode | null>(null);
+  const [selectedStreamNode, setSelectedStreamNode] = useState<ApiNode | null>(null);
+  const [streamsAndCombos, setStreamsAndCombos] = useState<ApiNode[]>([]);
 
   // Fetch offering colleges when a DEGREE node is selected
   const [offeringColleges, setOfferingColleges] = useState<InstituteCourseMapping[]>([]);
@@ -86,14 +92,42 @@ export const RoadmapPage: React.FC = () => {
       try {
         const qualsRes = await api.getNodes({ type: 'QUALIFICATION', limit: 100 });
         const careersRes = await api.getNodes({ type: 'OCCUPATION', limit: 100 });
+        const streamsRes = await api.getNodes({ type: 'STREAM', limit: 100 });
+        const combosRes = await api.getNodes({ type: 'SUBJECT_COMBINATION', limit: 100 });
+
         setQualifications(qualsRes.nodes);
         setCareers(careersRes.nodes);
+        setStreamsAndCombos([...streamsRes.nodes, ...combosRes.nodes]);
       } catch (err) {
         console.error('Failed to load dropdown options', err);
       }
     };
     loadDropdowns();
   }, []);
+
+  // Sync store startNode to local dropdown selections on initial load (runs once)
+  useEffect(() => {
+    if (qualifications.length === 0) return;
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
+    const currentStart = useRoadmapStore.getState().startNode;
+    if (currentStart) {
+      if (currentStart.name.toLowerCase().includes('class 12')) {
+        setSelectedLevelNode(currentStart);
+        setSelectedStreamNode(null);
+        setStartNode(null);
+      } else if (currentStart.type === 'STREAM' || currentStart.type === 'SUBJECT_COMBINATION') {
+        const class12Node = qualifications.find((q) => q.name.toLowerCase().includes('class 12')) || null;
+        setSelectedLevelNode(class12Node);
+        setSelectedStreamNode(currentStart);
+        // keep startNode as-is since it's already a valid stream/combo
+      } else {
+        setSelectedLevelNode(currentStart);
+        setSelectedStreamNode(null);
+      }
+    }
+  }, [qualifications, setStartNode]);
 
   // Fetch pathways when start/target nodes change
   useEffect(() => {
@@ -132,8 +166,28 @@ export const RoadmapPage: React.FC = () => {
 
   const activePathNodeIds = pathways[selectedPathIndex]?.steps.map((s) => s.node._id) || [];
 
+  // Check if currently selected level is Class 12
+  const isClass12Selected = !!selectedLevelNode && selectedLevelNode.name.toLowerCase().includes('class 12');
+
   const handleStartChange = (id: string) => {
     const nodeObj = qualifications.find((q) => q._id === id) || null;
+    setSelectedLevelNode(nodeObj);
+    setSelectedStreamNode(null);
+
+    if (nodeObj && nodeObj.name.toLowerCase().includes('class 12')) {
+      // Don't set startNode yet — wait for stream selection
+      setStartNode(null);
+    } else {
+      // For non-Class-12 qualifications, set startNode directly
+      setStartNode(nodeObj);
+    }
+    setSelectedNode(null);
+  };
+
+  const handleStreamChange = (id: string) => {
+    const nodeObj = streamsAndCombos.find((n) => n._id === id) || null;
+    setSelectedStreamNode(nodeObj);
+    // The selected stream/subject-combination becomes the actual start node for pathfinding
     setStartNode(nodeObj);
     setSelectedNode(null);
   };
@@ -149,6 +203,16 @@ export const RoadmapPage: React.FC = () => {
     label: q.name,
     icon: Search
   }));
+
+  // Stream options: show STREAM nodes first, then SUBJECT_COMBINATION nodes
+  const streamOptions = streamsAndCombos
+    .filter((n) => n.type === 'STREAM')
+    .map((n) => ({ value: n._id, label: n.name, icon: Search }))
+    .concat(
+      streamsAndCombos
+        .filter((n) => n.type === 'SUBJECT_COMBINATION')
+        .map((n) => ({ value: n._id, label: n.name, icon: Briefcase }))
+    );
 
   const targetOptions = careers.map((c) => ({
     value: c._id,
@@ -218,12 +282,42 @@ export const RoadmapPage: React.FC = () => {
               </label>
               <CustomDropdown
                 options={startOptions}
-                value={startNode?._id || ''}
+                value={selectedLevelNode?._id || ''}
                 onChange={handleStartChange}
                 placeholder="Select current state..."
                 showSearch={true}
               />
             </div>
+
+            {/* Stream / Subject Combination picker — only visible when Class 12 is selected */}
+            <AnimatePresence>
+              {isClass12Selected && (
+                <motion.div
+                  key="stream-picker"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-3 rounded-xl border border-cyan-200 dark:border-brandCyan/20 bg-cyan-50/60 dark:bg-brandCyan/5 space-y-2">
+                    <label className="block text-xs font-semibold text-cyan-700 dark:text-brandCyan uppercase tracking-wider">
+                      Select Stream
+                    </label>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                      Class 12 pathways depend on your stream. Pick your stream or subject combination to see the right roadmap.
+                    </p>
+                    <CustomDropdown
+                      options={streamOptions}
+                      value={selectedStreamNode?._id || ''}
+                      onChange={handleStreamChange}
+                      placeholder="Choose your stream..."
+                      showSearch={true}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {viewMode === 'PATH' && (
               <div>
@@ -333,7 +427,9 @@ export const RoadmapPage: React.FC = () => {
           <div className="p-4 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl text-center">
             <HelpCircle className="w-6 h-6 mx-auto mb-2 text-slate-400 dark:text-slate-500" />
             <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              Select both a starting qualification and target career to visualize the pathway map.
+              {isClass12Selected && !selectedStreamNode
+                ? 'Please select your stream above to continue building the roadmap.'
+                : 'Select both a starting qualification and target career to visualize the pathway map.'}
             </p>
           </div>
         )}
