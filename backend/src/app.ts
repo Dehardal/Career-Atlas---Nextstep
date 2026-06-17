@@ -27,7 +27,7 @@ app.use(
     contentSecurityPolicy: false, // Allow loading frontend scripts, stylesheets, and Google Identity Services SDK
   })
 );
-app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173'], credentials: true }));
+app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
