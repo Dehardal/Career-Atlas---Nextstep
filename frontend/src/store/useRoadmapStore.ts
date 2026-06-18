@@ -16,8 +16,6 @@ interface RoadmapState {
   explorerNodes: Node[];
   explorerRelationships: Relationship[];
   expandedNodeIds: string[];
-  // Stream selection state
-  streamNode: Node | null;
 
   // Theme State
   theme: 'dark' | 'light';
@@ -71,7 +69,7 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
   })(),
 
   setStartNode: (node) => {
-    set({ startNode: node, pathways: [], selectedPathIndex: 0, streamNode: null });
+    set({ startNode: node, pathways: [], selectedPathIndex: 0 });
     // Auto-initialize explorer when setting startNode if we are in explorer mode
     if (node) {
       if (get().viewMode === 'EXPLORER') {
@@ -80,7 +78,6 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
     }
   },
   setTargetNode: (node) => set({ targetNode: node, pathways: [], selectedPathIndex: 0 }),
-  setStreamNode: (node) => set({ streamNode: node }),
   setSelectedPathIndex: (index) => set({ selectedPathIndex: index }),
 
   fetchBfsTree: async (nodeId) => {
@@ -94,12 +91,12 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
   },
 
   fetchPathways: async () => {
-    const { startNode, targetNode, streamNode } = get();
+    const { startNode, targetNode } = get();
     if (!startNode || !targetNode) return;
 
     set({ loading: true, error: null });
     try {
-      const { paths } = await api.getAlternativePaths(startNode._id, targetNode._id, streamNode?._id);
+      const { paths } = await api.getAlternativePaths(startNode._id, targetNode._id);
       set({ pathways: paths, selectedPathIndex: 0, loading: false });
     } catch (err: any) {
       set({ error: err.response?.data?.error || 'Failed to fetch pathways', loading: false });

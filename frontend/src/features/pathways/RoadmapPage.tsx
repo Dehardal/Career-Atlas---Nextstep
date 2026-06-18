@@ -20,7 +20,6 @@ import {
   LogIn
 } from 'lucide-react';
 import { useRoadmapStore } from '../../store/useRoadmapStore';
-import StreamDropdown from '../../components/common/StreamDropdown';
 import { api } from '../../services/api';
 import type { Node as ApiNode, Relationship, InstituteCourseMapping } from '../../services/api';
 import PathwayMap from '../../components/graph/PathwayMap';
@@ -50,9 +49,7 @@ export const RoadmapPage: React.FC = () => {
     expandNode,
     collapseNode,
     resetExplorer,
-    user,
-    streamNode,
-    setStreamNode
+    user
   } = useRoadmapStore();
 
   const [qualifications, setQualifications] = useState<ApiNode[]>([]);
@@ -100,11 +97,10 @@ export const RoadmapPage: React.FC = () => {
 
   // Fetch pathways when start/target nodes change
   useEffect(() => {
-    const needStream = startNode?.type === 'STAGE' && startNode?.name === 'Class 12';
-    if (startNode && targetNode && (!needStream || (needStream && streamNode))) {
+    if (startNode && targetNode) {
       fetchPathways();
     }
-  }, [startNode, targetNode, streamNode, fetchPathways]);
+  }, [startNode, targetNode, fetchPathways]);
 
   // Aggregate all nodes and relationships across all pathways
   const allNodes: ApiNode[] = [];
@@ -217,25 +213,17 @@ export const RoadmapPage: React.FC = () => {
 
           <div className="space-y-4">
             <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
-              Start Point
-            </label>
-            <CustomDropdown
-              options={startOptions}
-              value={startNode?._id || ''}
-              onChange={handleStartChange}
-              placeholder="Select current state..."
-              showSearch={true}
-            />
-          </div>
-          {startNode?.type === 'STAGE' && startNode?.name === 'Class 12' && (
-            <div className="mt-4">
               <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5 uppercase tracking-wider">
-                Select Stream
+                Start Point
               </label>
-              <StreamDropdown selectedStream={streamNode} onSelect={setStreamNode} />
+              <CustomDropdown
+                options={startOptions}
+                value={startNode?._id || ''}
+                onChange={handleStartChange}
+                placeholder="Select current state..."
+                showSearch={true}
+              />
             </div>
-          )}
 
             {viewMode === 'PATH' && (
               <div>
