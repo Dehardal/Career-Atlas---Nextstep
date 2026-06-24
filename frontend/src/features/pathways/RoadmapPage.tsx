@@ -54,6 +54,7 @@ export const RoadmapPage: React.FC = () => {
 
   const [qualifications, setQualifications] = useState<ApiNode[]>([]);
   const [careers, setCareers] = useState<ApiNode[]>([]);
+  const [streams, setStreams] = useState<ApiNode[]>([]);
   const [selectedNode, setSelectedNode] = useState<ApiNode | null>(null);
 
   // Fetch offering colleges when a DEGREE node is selected
@@ -86,8 +87,10 @@ export const RoadmapPage: React.FC = () => {
       try {
         const qualsRes = await api.getNodes({ type: 'QUALIFICATION', limit: 100 });
         const careersRes = await api.getNodes({ type: 'OCCUPATION', limit: 100 });
+        const streamsRes = await api.getNodes({ type: 'STREAM', limit: 100 });
         setQualifications(qualsRes.nodes);
         setCareers(careersRes.nodes);
+        setStreams(streamsRes.nodes);
       } catch (err) {
         console.error('Failed to load dropdown options', err);
       }
@@ -133,7 +136,10 @@ export const RoadmapPage: React.FC = () => {
   const activePathNodeIds = pathways[selectedPathIndex]?.steps.map((s) => s.node._id) || [];
 
   const handleStartChange = (id: string) => {
-    const nodeObj = qualifications.find((q) => q._id === id) || null;
+    const nodeObj = 
+      qualifications.find((q) => q._id === id) || 
+      streams.find((s) => s._id === id) || 
+      null;
     setStartNode(nodeObj);
     setSelectedNode(null);
   };
@@ -144,11 +150,18 @@ export const RoadmapPage: React.FC = () => {
     setSelectedNode(null);
   };
 
-  const startOptions = qualifications.map((q) => ({
-    value: q._id,
-    label: q.name,
-    icon: Search
-  }));
+  const startOptions = [
+    ...qualifications.filter((q) => q.name !== 'Class 12').map((q) => ({
+      value: q._id,
+      label: q.name,
+      icon: Search
+    })),
+    ...streams.map((s) => ({
+      value: s._id,
+      label: `Class 12 - ${s.name}`,
+      icon: Search
+    }))
+  ];
 
   const targetOptions = careers.map((c) => ({
     value: c._id,

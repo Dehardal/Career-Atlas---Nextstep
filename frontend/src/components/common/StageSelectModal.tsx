@@ -36,6 +36,13 @@ const getStageIcon = (name: string): string => {
   return STAGE_ICONS['default'];
 };
 
+const getStreamDisplayNameAndEmoji = (name: string) => {
+  if (name.includes('Science')) return { label: 'Science', emoji: '🧪' };
+  if (name.includes('Commerce')) return { label: 'Commerce', emoji: '💼' };
+  if (name.includes('Arts') || name.includes('Humanities')) return { label: 'Arts & Humanities', emoji: '🎨' };
+  return { label: name, emoji: '✨' };
+};
+
 export const StageSelectModal: React.FC<StageSelectModalProps> = ({
   isOpen,
   onClose,
@@ -43,29 +50,44 @@ export const StageSelectModal: React.FC<StageSelectModalProps> = ({
   onConfirm,
 }) => {
   const [qualifications, setQualifications] = useState<Node[]>([]);
+  const [streams, setStreams] = useState<Node[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Node | null>(null);
+  const [selectedStream, setSelectedStream] = useState<Node | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
     setSelected(null);
-    const fetchQuals = async () => {
+    setSelectedStream(null);
+    const fetchQualsAndStreams = async () => {
       setLoading(true);
       try {
-        const res = await api.getNodes({ type: 'QUALIFICATION', limit: 100 });
-        setQualifications(res.nodes);
+        const [qualsRes, streamsRes] = await Promise.all([
+          api.getNodes({ type: 'QUALIFICATION', limit: 100 }),
+          api.getNodes({ type: 'STREAM', limit: 100 }),
+        ]);
+        setQualifications(qualsRes.nodes);
+        setStreams(streamsRes.nodes);
       } catch (err) {
-        console.error('Failed to load qualifications', err);
+        console.error('Failed to load qualifications or streams', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchQuals();
+    fetchQualsAndStreams();
   }, [isOpen]);
 
+  const isClass12 = selected?.name === 'Class 12';
+  const canConfirm = selected && (!isClass12 || selectedStream);
+
   const handleConfirm = () => {
-    if (!selected || !targetCareer) return;
-    onConfirm(selected, targetCareer);
+    if (!selected || !targetCareer || !canConfirm) return;
+    if (isClass12) {
+      if (!selectedStream) return;
+      onConfirm(selectedStream, targetCareer);
+    } else {
+      onConfirm(selected, targetCareer);
+    }
   };
 
   // Close on Escape
@@ -136,7 +158,7 @@ export const StageSelectModal: React.FC<StageSelectModalProps> = ({
             </div>
 
             {/* Stage List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-500">
                   <Loader2 className="w-6 h-6 animate-spin mb-3 text-emerald-500" />
@@ -147,68 +169,112 @@ export const StageSelectModal: React.FC<StageSelectModalProps> = ({
                   No qualification stages found.
                 </div>
               ) : (
-                qualifications.map((qual, idx) => {
-                  const isSelected = selected?._id === qual._id;
-                  const icon = getStageIcon(qual.name);
+                <div className="space-y-2">
+                  {qualifications.map((qual, idx) => {
+                    const isSelected = selected?._id === qual._id;
+                    const icon = getStageIcon(qual.name);
 
-                  return (
-                    <motion.button
-                      key={qual._id}
-                      initial={{ opacity: 0, x: -12 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.04, duration: 0.25 }}
-                      onClick={() => setSelected(qual)}
-                      className={`w-full flex items-center space-x-3 p-3.5 rounded-xl border text-left transition-all duration-200 group ${
-                        isSelected
-                          ? 'bg-emerald-500/10 border-emerald-500/40 shadow-[0_0_0_1px_rgba(52,211,153,0.2)]'
-                          : 'border-white/5 hover:border-white/15 hover:bg-white/3'
-                      }`}
-                    >
-                      {/* Icon */}
-                      <span
-                        className={`text-xl w-9 h-9 flex items-center justify-center rounded-lg shrink-0 transition-colors ${
-                          isSelected ? 'bg-emerald-500/20' : 'bg-white/5 group-hover:bg-white/8'
+                    return (
+                      <motion.button
+                        key={qual._id}
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.04, duration: 0.25 }}
+                        onClick={() => {
+                          setSelected(qual);
+                          setSelectedStream(null); // Reset stream on stage change
+                        }}
+                        className={`w-full flex items-center space-x-3 p-3.5 rounded-xl border text-left transition-all duration-200 group ${
+                          isSelected
+                            ? 'bg-emerald-500/10 border-emerald-500/40 shadow-[0_0_0_1px_rgba(52,211,153,0.2)]'
+                            : 'border-white/5 hover:border-white/15 hover:bg-white/3'
                         }`}
                       >
-                        {icon}
-                      </span>
-
-                      {/* Text */}
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className={`text-sm font-semibold truncate transition-colors ${
-                            isSelected ? 'text-emerald-300' : 'text-slate-200 group-hover:text-white'
+                        {/* Icon */}
+                        <span
+                          className={`text-xl w-9 h-9 flex items-center justify-center rounded-lg shrink-0 transition-colors ${
+                            isSelected ? 'bg-emerald-500/20' : 'bg-white/5 group-hover:bg-white/8'
                           }`}
                         >
-                          {qual.name}
-                        </p>
-                        {qual.description && (
-                          <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1 group-hover:text-slate-400 transition-colors">
-                            {qual.description}
-                          </p>
-                        )}
-                      </div>
+                          {icon}
+                        </span>
 
-                      {/* Selection indicator */}
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-all ${
-                          isSelected
-                            ? 'border-emerald-400 bg-emerald-400'
-                            : 'border-slate-600 group-hover:border-slate-400'
-                        }`}
-                      >
-                        {isSelected && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-1.5 h-1.5 rounded-full bg-[#0B1120]"
-                          />
-                        )}
-                      </div>
-                    </motion.button>
-                  );
-                })
+                        {/* Text */}
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className={`text-sm font-semibold truncate transition-colors ${
+                              isSelected ? 'text-emerald-300' : 'text-slate-200 group-hover:text-white'
+                            }`}
+                          >
+                            {qual.name}
+                          </p>
+                          {qual.description && (
+                            <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1 group-hover:text-slate-400 transition-colors">
+                              {qual.description}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Selection indicator */}
+                        <div
+                          className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center transition-all ${
+                            isSelected
+                              ? 'border-emerald-400 bg-emerald-400'
+                              : 'border-slate-600 group-hover:border-slate-400'
+                          }`}
+                        >
+                          {isSelected && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="w-1.5 h-1.5 rounded-full bg-[#0B1120]"
+                            />
+                          )}
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
               )}
+
+              {/* Stream Selection Section */}
+              <AnimatePresence>
+                {isClass12 && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                    animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                    className="border-t border-white/5 pt-4 space-y-3"
+                  >
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      Select your Class 12 Stream
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {streams.map((stream) => {
+                        const isStreamSelected = selectedStream?._id === stream._id;
+                        const info = getStreamDisplayNameAndEmoji(stream.name);
+                        return (
+                          <button
+                            key={stream._id}
+                            type="button"
+                            onClick={() => setSelectedStream(stream)}
+                            className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all duration-200 ${
+                              isStreamSelected
+                                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300'
+                                : 'border-white/5 hover:border-white/10 hover:bg-white/3 text-slate-400 hover:text-slate-200'
+                            }`}
+                          >
+                            <span className="text-xl mb-1">{info.emoji}</span>
+                            <span className="text-[10px] font-bold tracking-tight leading-tight">
+                              {info.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Footer */}
@@ -222,7 +288,11 @@ export const StageSelectModal: React.FC<StageSelectModalProps> = ({
                   <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   <p className="text-xs text-slate-400">
                     Mapping{' '}
-                    <span className="text-emerald-400 font-semibold">{selected.name}</span>
+                    <span className="text-emerald-400 font-semibold">
+                      {isClass12 && selectedStream
+                        ? `Class 12 (${getStreamDisplayNameAndEmoji(selectedStream.name).label} Stream)`
+                        : selected.name}
+                    </span>
                     {' → '}
                     <span className="text-emerald-400 font-semibold">{targetCareer?.name}</span>
                   </p>
@@ -237,24 +307,26 @@ export const StageSelectModal: React.FC<StageSelectModalProps> = ({
                   Cancel
                 </button>
                 <motion.button
-                  whileHover={{ scale: selected ? 1.02 : 1 }}
-                  whileTap={{ scale: selected ? 0.97 : 1 }}
+                  whileHover={{ scale: canConfirm ? 1.02 : 1 }}
+                  whileTap={{ scale: canConfirm ? 0.97 : 1 }}
                   onClick={handleConfirm}
-                  disabled={!selected}
+                  disabled={!canConfirm}
                   className={`flex-1 flex items-center justify-center space-x-2 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    selected
+                    canConfirm
                       ? 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-lg shadow-emerald-900/40'
                       : 'bg-slate-800 text-slate-600 cursor-not-allowed'
                   }`}
                 >
-                  {selected ? (
+                  {canConfirm ? (
                     <>
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Chart My Path</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </>
                   ) : (
-                    <span>Select a Stage First</span>
+                    <span>
+                      {isClass12 ? 'Choose a Stream' : 'Select a Stage First'}
+                    </span>
                   )}
                 </motion.button>
               </div>
