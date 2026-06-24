@@ -5,14 +5,19 @@ import { api } from '../../services/api';
 import type { Node } from '../../services/api';
 import { useRoadmapStore } from '../../store/useRoadmapStore';
 import { CustomDropdown } from '../../components/common/CustomDropdown';
+import { StageSelectModal } from '../../components/common/StageSelectModal';
 
 export const CareerPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setTargetNode } = useRoadmapStore();
+  const { setTargetNode, setStartNode } = useRoadmapStore();
 
   const [careers, setCareers] = useState<Node[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Stage selection modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [pendingCareer, setPendingCareer] = useState<Node | null>(null);
   
   // Filtering & Search
   const [search, setSearch] = useState('');
@@ -43,7 +48,15 @@ export const CareerPage: React.FC = () => {
   }, []);
 
   const handleMapRoute = (node: Node) => {
-    setTargetNode(node);
+    setPendingCareer(node);
+    setModalOpen(true);
+  };
+
+  const handleModalConfirm = (startNode: Node, targetNode: Node) => {
+    setStartNode(startNode);
+    setTargetNode(targetNode);
+    setModalOpen(false);
+    setPendingCareer(null);
     navigate('/roadmap');
   };
 
@@ -183,6 +196,12 @@ export const CareerPage: React.FC = () => {
           )}
         </>
       )}
+      <StageSelectModal
+        isOpen={modalOpen}
+        onClose={() => { setModalOpen(false); setPendingCareer(null); }}
+        targetCareer={pendingCareer}
+        onConfirm={handleModalConfirm}
+      />
     </div>
   );
 };
