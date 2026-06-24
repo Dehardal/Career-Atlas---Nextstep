@@ -135,16 +135,16 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
       levels[d].push(node._id);
     });
 
-    // 4. Align children under parent average X coordinates and resolve 1D overlaps
-    const HORIZONTAL_GAP = 280;
-    const minSpacing = 320; // card width (280) + gap (40)
-    const xPositions = new Map<string, number>();
+    // 4. Align children under parent average Y coordinates and resolve 1D overlaps
+    const VERTICAL_GAP = 140;
+    const minSpacing = 150; // card height + vertical gap
+    const yPositions = new Map<string, number>();
 
     // Position level 0
     const level0 = levels[0] || [];
     level0.forEach((nodeId, idx) => {
-      const offset = ((level0.length - 1) * HORIZONTAL_GAP) / 2;
-      xPositions.set(nodeId, idx * HORIZONTAL_GAP - offset);
+      const offset = ((level0.length - 1) * VERTICAL_GAP) / 2;
+      yPositions.set(nodeId, idx * VERTICAL_GAP - offset);
     });
 
     // Process levels 1+
@@ -152,52 +152,52 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
       const currentLevel = levels[d] || [];
       if (currentLevel.length === 0) continue;
 
-      const preferredX = new Map<string, number>();
+      const preferredY = new Map<string, number>();
       currentLevel.forEach((nodeId) => {
         const parents = reverseAdj.get(nodeId) || [];
-        const positionedParents = parents.filter((pId) => xPositions.has(pId));
+        const positionedParents = parents.filter((pId) => yPositions.has(pId));
 
         if (positionedParents.length > 0) {
-          const avgX =
-            positionedParents.reduce((sum, pId) => sum + xPositions.get(pId)!, 0) /
+          const avgY =
+            positionedParents.reduce((sum, pId) => sum + yPositions.get(pId)!, 0) /
             positionedParents.length;
-          preferredX.set(nodeId, avgX);
+          preferredY.set(nodeId, avgY);
         } else {
-          preferredX.set(nodeId, 0);
+          preferredY.set(nodeId, 0);
         }
       });
 
-      // Sort by preferred coordinate to preserve horizontal order
-      currentLevel.sort((a, b) => preferredX.get(a)! - preferredX.get(b)!);
+      // Sort by preferred coordinate to preserve vertical order
+      currentLevel.sort((a, b) => preferredY.get(a)! - preferredY.get(b)!);
 
-      // Force-directed 1D separation sweep
+      // Force-directed 1D separation sweep along the Y axis
       const positions = currentLevel.map((nodeId) => ({
         id: nodeId,
-        x: preferredX.get(nodeId)!,
+        y: preferredY.get(nodeId)!,
       }));
 
       for (let iter = 0; iter < 12; iter++) {
         for (let i = 0; i < positions.length - 1; i++) {
-          const left = positions[i];
-          const right = positions[i + 1];
-          const overlap = minSpacing - (right.x - left.x);
+          const top = positions[i];
+          const bottom = positions[i + 1];
+          const overlap = minSpacing - (bottom.y - top.y);
           if (overlap > 0) {
-            left.x -= overlap / 2;
-            right.x += overlap / 2;
+            top.y -= overlap / 2;
+            bottom.y += overlap / 2;
           }
         }
       }
 
       positions.forEach((pos) => {
-        xPositions.set(pos.id, pos.x);
+        yPositions.set(pos.id, pos.y);
       });
     }
 
     // 5. Create flow nodes
     const flowNodes = nodes.map((node) => {
       const d = depths.get(node._id) ?? 0;
-      const x = xPositions.get(node._id) ?? 0;
-      const y = d * 180 + 40; // Reduced vertical level spacing to 180px
+      const x = d * 310 + 40; // Horizontal gap of 310px per depth level
+      const y = yPositions.get(node._id) ?? 0;
 
       const isHighlighted = highlightedPathNodeIds.includes(node._id);
       const isRoot = node._id === startNodeId;
@@ -276,6 +276,12 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
 
   return (
     <div className="w-full h-full min-h-[500px] bg-slate-50 dark:bg-[#080C14] rounded-2xl border border-slate-200 dark:border-white/5 relative overflow-hidden">
+      {/* Floating UX Instruction Tooltip */}
+      <div className="absolute top-4 left-4 z-10 bg-white/80 dark:bg-[#0E1524]/85 backdrop-blur-md border border-slate-200 dark:border-white/5 px-3.5 py-2 rounded-xl pointer-events-none flex items-center space-x-2 text-[10px] text-slate-500 dark:text-slate-400 shadow-lg">
+        <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+        <span>Drag to pan • Scroll to zoom • Use node buttons to explore</span>
+      </div>
+
       <ReactFlow
         nodes={rfNodes}
         edges={rfEdges}

@@ -160,10 +160,10 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
         style={{ backgroundColor: config.color }}
       />
 
-      {/* Top Handles */}
+      {/* Left Target Handles */}
       <Handle 
         type="target" 
-        position={Position.Top} 
+        position={Position.Left} 
         style={{ background: config.color, width: 8, height: 8, border: '2px solid ' + (theme === 'dark' ? '#090D16' : '#ffffff') }} 
       />
 
@@ -206,10 +206,10 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
         )}
       </div>
 
-      {/* Bottom Handles */}
+      {/* Right Source Handles */}
       <Handle 
         type="source" 
-        position={Position.Bottom} 
+        position={Position.Right} 
         style={{ background: config.color, width: 8, height: 8, border: '2px solid ' + (theme === 'dark' ? '#090D16' : '#ffffff') }} 
       />
     </div>
