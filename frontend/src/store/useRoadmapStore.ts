@@ -68,7 +68,7 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
     }
   })(),
 
-  setStartNode: (node) => {
+  setStartNode: (node: Node | null) => {
     set({ startNode: node, pathways: [], selectedPathIndex: 0 });
     // Auto-initialize explorer when setting startNode if we are in explorer mode
     if (node) {
@@ -77,10 +77,10 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
       }
     }
   },
-  setTargetNode: (node) => set({ targetNode: node, pathways: [], selectedPathIndex: 0 }),
-  setSelectedPathIndex: (index) => set({ selectedPathIndex: index }),
+  setTargetNode: (node: Node | null) => set({ targetNode: node, pathways: [], selectedPathIndex: 0 }),
+  setSelectedPathIndex: (index: number) => set({ selectedPathIndex: index }),
 
-  fetchBfsTree: async (nodeId) => {
+  fetchBfsTree: async (nodeId: string) => {
     set({ loading: true, error: null });
     try {
       const { bfsTree } = await api.getBfsTree(nodeId);
@@ -118,7 +118,7 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
   }),
 
   // Explorer Actions Implementations
-  setViewMode: (viewMode) => {
+  setViewMode: (viewMode: 'PATH' | 'EXPLORER') => {
     set({ viewMode });
     if (viewMode === 'EXPLORER') {
       const { startNode } = get();
@@ -128,7 +128,7 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
     }
   },
 
-  expandNode: async (nodeId) => {
+  expandNode: async (nodeId: string) => {
     const { expandedNodeIds, explorerNodes, explorerRelationships } = get();
     if (expandedNodeIds.includes(nodeId)) return;
 
@@ -222,7 +222,7 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
     }
   },
 
-  collapseNode: (nodeId) => {
+  collapseNode: (nodeId: string) => {
     const { expandedNodeIds, explorerNodes, explorerRelationships, startNode } = get();
     if (!startNode) return;
 
@@ -270,7 +270,7 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
     });
   },
 
-  resetExplorer: (startNode) => {
+  resetExplorer: (startNode: Node) => {
     set({
       viewMode: 'EXPLORER',
       startNode,

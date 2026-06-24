@@ -45,7 +45,6 @@ export const StageSelectModal: React.FC<StageSelectModalProps> = ({
   const [qualifications, setQualifications] = useState<Node[]>([]);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<Node | null>(null);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -159,8 +158,6 @@ export const StageSelectModal: React.FC<StageSelectModalProps> = ({
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.04, duration: 0.25 }}
                       onClick={() => setSelected(qual)}
-                      onMouseEnter={() => setHoveredId(qual._id)}
-                      onMouseLeave={() => setHoveredId(null)}
                       className={`w-full flex items-center space-x-3 p-3.5 rounded-xl border text-left transition-all duration-200 group ${
                         isSelected
                           ? 'bg-emerald-500/10 border-emerald-500/40 shadow-[0_0_0_1px_rgba(52,211,153,0.2)]'
