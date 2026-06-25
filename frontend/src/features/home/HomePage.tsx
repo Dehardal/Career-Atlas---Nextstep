@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Compass,
   Briefcase,
@@ -11,7 +11,13 @@ import {
   Search,
   Map,
   Sparkles,
-  PlusCircle
+  PlusCircle,
+  ChevronDown,
+  HelpCircle,
+  Layers,
+  CheckCircle2,
+  Trophy,
+  Award
 } from 'lucide-react';
 import { api } from '../../services/api';
 import type { Node } from '../../services/api';
@@ -28,6 +34,12 @@ export const HomePage: React.FC = () => {
   const [selectedTarget, setSelectedTarget] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
+  // Home Screen Interactive States
+  const [activeTrackerStep, setActiveTrackerStep] = useState(0);
+  const [activeTab, setActiveTab] = useState<'pathfinder' | 'explorer' | 'compare'>('pathfinder');
+  const [explorerMockExpanded, setExplorerMockExpanded] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -43,6 +55,14 @@ export const HomePage: React.FC = () => {
       }
     };
     loadData();
+  }, []);
+
+  // Timer for Hero micro-roadmap path tracker
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveTrackerStep((prev) => (prev + 1) % 4);
+    }, 2800);
+    return () => clearInterval(interval);
   }, []);
 
   const handleSearchRoute = () => {
@@ -67,196 +87,445 @@ export const HomePage: React.FC = () => {
     icon: Briefcase
   }));
 
-  const dashboardCards = [
-    {
-      title: 'Career Explorer',
-      desc: 'Browse in-demand professions, high growth rate sectors, and average salary benchmarks.',
-      path: '/careers',
-      icon: Briefcase,
-      color: 'text-emerald-600 dark:text-emerald-450 bg-emerald-500/10 border-emerald-500/20 dark:border-emerald-500/10 hover:border-emerald-500/40',
-    },
-    {
-      title: 'Degree Explorer',
-      desc: 'Discover undergraduate and postgraduate degrees, durations, and eligibility rules.',
-      path: '/degrees',
-      icon: GraduationCap,
-      color: 'text-blue-600 dark:text-blue-455 bg-blue-500/10 border-blue-500/20 dark:border-blue-500/10 hover:border-blue-500/40',
-    },
-    {
-      title: 'Exam Explorer',
-      desc: 'Find national and state-level entrance exams, conducting bodies, and registration details.',
-      path: '/exams',
-      icon: FileText,
-      color: 'text-red-650 dark:text-red-400 bg-red-500/10 border-red-500/20 dark:border-red-500/10 hover:border-red-500/40',
-    },
-    {
-      title: 'Institute Explorer',
-      desc: 'Search leading government and private colleges ranked by NIRF with locations.',
-      path: '/institutes',
-      icon: Landmark,
-      color: 'text-cyan-600 dark:text-brandCyan bg-cyan-500/10 border-cyan-500/20 dark:border-cyan-500/10 hover:border-cyan-500/40',
-    },
+  const trackerSteps = [
+    { title: 'School Stage', detail: 'Class 12 - Science', icon: Layers, color: 'text-amber-500 bg-amber-500/10' },
+    { title: 'Entrance Gate', detail: 'JEE Advanced Exam', icon: FileText, color: 'text-red-500 bg-red-500/10' },
+    { title: 'College Pathway', detail: 'B.Tech Computer Science', icon: GraduationCap, color: 'text-blue-500 bg-blue-500/10' },
+    { title: 'Target Goal', detail: 'AI Software Engineer', icon: Briefcase, color: 'text-emerald-500 bg-emerald-500/10' }
   ];
 
-  // Framer motion variants
+  const statsItems = [
+    { count: '5,005+', label: 'Offering Colleges', desc: 'NIRF ranked Govt & Private profiles', icon: Landmark, border: 'hover:border-cyan-500/30' },
+    { count: '200+', label: 'Discovered Pathways', desc: 'Dynamic visual academic connections', icon: Map, border: 'hover:border-indigo-500/30' },
+    { count: '50+', label: 'National Exams', desc: 'Conducting dates & stream criteria', icon: FileText, border: 'hover:border-red-500/30' },
+    { count: '10,000+', label: 'Student Decisions', desc: 'Saves, bookmarks & custom maps', icon: Trophy, border: 'hover:border-emerald-500/30' },
+  ];
+
+  const faqs = [
+    {
+      q: 'How does Career Atlas calculate alternative paths?',
+      a: 'Our graph traversal engine analyzes prerequisite eligibility rules, admission exams, and degree streams to outline all possible sequential paths between your current qualification and target profession.'
+    },
+    {
+      q: 'Can I save my roadmaps and access them later?',
+      a: 'Absolutely! By logging in with Google, you unlock a private Student Dashboard where you can save pathway planners, reload them instantly on the canvas, and manage bookmarked items.'
+    },
+    {
+      q: 'What is the difference between Path Finder and Interactive Explorer?',
+      a: 'Path Finder plots the end-to-end route to a chosen dream career. Interactive Explorer lets you start from a single stage and build a roadmap organically by expanding connections branch-by-branch.'
+    },
+    {
+      q: 'How can I suggest missing colleges or qualifications?',
+      a: 'We support crowdsourcing! Click the "Suggest Pathway Opportunity" button in the contribution panel below to submit missing nodes. Our review team verifies and seeds suggestions weekly.'
+    }
+  ];
+
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15
-      }
-    }
+    show: { opacity: 1, transition: { staggerChildren: 0.15 } }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { type: 'spring', damping: 20 } }
+    hidden: { opacity: 0, y: 30 },
+    show: { opacity: 1, y: 0, transition: { type: 'spring', damping: 22 } }
   };
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col space-y-16"
-    >
-      {/* Hero Section */}
-      <motion.div variants={itemVariants} className="text-center max-w-4xl mx-auto space-y-6">
-        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brandIndigo/10 border border-brandIndigo/35 text-cyan-700 dark:text-brandCyan text-sm font-medium mb-4 shadow-sm">
-          <Compass className="w-4 h-4 animate-spin-slow" />
-          <span>Interactive Career Navigation System</span>
-        </div>
-        
-        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.15]">
-          Your Career GPS:{' '}
-          <span className="bg-gradient-to-r from-brandCyan via-brandIndigo to-purple-500 bg-clip-text text-transparent">
-            Chart Your Course
-          </span>
-        </h1>
+    <div className="relative overflow-hidden min-h-screen">
+      {/* Premium Visual Grids & Moving Light Blobs */}
+      <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+      <div className="absolute top-1/4 left-1/10 w-96 h-96 bg-brandCyan/10 rounded-full filter blur-[100px] animate-pulse pointer-events-none" />
+      <div className="absolute top-1/3 right-1/10 w-96 h-96 bg-brandIndigo/10 rounded-full filter blur-[100px] animate-pulse pointer-events-none delay-1000" />
 
-        <p className="text-slate-650 dark:text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
-          Explore educational pathways, discover degrees, and find the shortest road to your target occupation. Custom-tailored pathway steps driven by real data.
-        </p>
-      </motion.div>
-
-      {/* GPS Navigator Form */}
       <motion.div
-        variants={itemVariants}
-        className="glass p-6 sm:p-8 rounded-3xl max-w-4xl mx-auto w-full shadow-2xl relative z-20 border border-slate-200 dark:border-white/10 bg-white/70 dark:bg-slate-900/70"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col space-y-24 relative z-10"
       >
-        {/* Glow behind */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-brandCyan/5 rounded-full filter blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-brandIndigo/5 rounded-full filter blur-3xl pointer-events-none" />
-
-        <div className="relative grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-350 mb-2">
-              Where are you currently? (Starting Point)
-            </label>
-            <CustomDropdown
-              options={startOptions}
-              value={selectedStart}
-              onChange={setSelectedStart}
-              placeholder="Choose your education level..."
-              showSearch={true}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-355 mb-2">
-              What is your Dream Career? (Target Point)
-            </label>
-            <CustomDropdown
-              options={targetOptions}
-              value={selectedTarget}
-              onChange={setSelectedTarget}
-              placeholder="Choose a profession..."
-              showSearch={true}
-            />
-          </div>
-        </div>
-
-        <div className="mt-8 flex justify-center">
-          <motion.button
-            whileHover={{ scale: 1.02, filter: 'brightness(1.05)' }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleSearchRoute}
-            disabled={!selectedStart || !selectedTarget || loading}
-            className="flex items-center space-x-2 bg-gradient-to-r from-brandCyan to-brandIndigo text-white font-bold px-8 py-3.5 rounded-xl transition-all shadow-lg shadow-brandIndigo/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-          >
-            <Map className="w-5 h-5" />
-            <span>Generate Roadmap</span>
-            <ArrowRight className="w-4 h-4" />
-          </motion.button>
-        </div>
-      </motion.div>
-
-      {/* Grid Explorers Section */}
-      <motion.div variants={itemVariants} className="space-y-8">
-        <h2 className="text-2xl font-bold text-center text-slate-900 dark:text-white">Explore Educational Components</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {dashboardCards.map((card) => (
-            <motion.div
-              key={card.title}
-              whileHover={{ y: -6, scale: 1.02 }}
-              onClick={() => navigate(card.path)}
-              className={`glass p-6 rounded-2xl cursor-pointer border flex flex-col justify-between group h-full shadow-md bg-white/40 dark:bg-slate-900/40 hover:shadow-xl transition-all duration-300 ${card.color}`}
-            >
-              <div>
-                <div className="mb-4 p-3 rounded-xl bg-white/80 dark:bg-slate-950/40 w-fit shadow-sm">
-                  <card.icon className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white mb-2">{card.title}</h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-6">{card.desc}</p>
-              </div>
-              <span className="flex items-center text-xs font-bold group-hover:translate-x-1.5 transition-transform duration-300 mt-auto">
-                Explore Now <ArrowRight className="w-3.5 h-3.5 ml-1" />
+        {/* Hero Section & Live Path Tracker widget */}
+        <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Hero text & GPS form */}
+          <div className="lg:col-span-7 space-y-6 text-left">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brandIndigo/10 border border-brandIndigo/35 text-cyan-700 dark:text-brandCyan text-xs font-semibold shadow-sm">
+              <Compass className="w-3.5 h-3.5 animate-spin-slow" />
+              <span>Interactive Career Navigation System</span>
+            </div>
+            
+            <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.12]">
+              Chart the shortest path to your{' '}
+              <span className="bg-gradient-to-r from-brandCyan via-brandIndigo to-purple-500 bg-clip-text text-transparent">
+                Dream Career
               </span>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+            </h1>
 
-      {/* Contribution Portal Section */}
-      <motion.div
-        variants={itemVariants}
-        className="glass rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-[#0B101D] dark:to-[#0F1629] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8"
-      >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-brandIndigo/5 rounded-full filter blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full filter blur-3xl pointer-events-none" />
+            <p className="text-slate-650 dark:text-slate-400 text-base max-w-xl leading-relaxed">
+              Explore dynamic horizontal path timelines, analyze eligibility rules, discover matching colleges, and build custom visual educational structures.
+            </p>
 
-        <div className="space-y-4 max-w-xl">
-          <div className="flex items-center space-x-2 text-brandCyan dark:text-brandCyan font-semibold">
-            <Sparkles className="w-5 h-5 text-brandCyan" />
-            <span className="text-xs uppercase tracking-wider">Crowdsourced Repository</span>
+            {/* GPS Navigator Form */}
+            <div className="glass p-6 rounded-3xl w-full shadow-xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-slate-900/85 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    Where are you currently?
+                  </label>
+                  <CustomDropdown
+                    options={startOptions}
+                    value={selectedStart}
+                    onChange={setSelectedStart}
+                    placeholder="Choose starting point..."
+                    showSearch={true}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                    What is your Dream Career?
+                  </label>
+                  <CustomDropdown
+                    options={targetOptions}
+                    value={selectedTarget}
+                    onChange={setSelectedTarget}
+                    placeholder="Choose a profession..."
+                    showSearch={true}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSearchRoute}
+                  disabled={!selectedStart || !selectedTarget || loading}
+                  className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-gradient-to-r from-brandCyan to-brandIndigo text-white font-bold px-7 py-3 rounded-xl transition-all shadow-lg shadow-brandIndigo/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Map className="w-4 h-4" />
+                  <span>Generate Roadmap</span>
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+              </div>
+            </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Contribute to Career Atlas
-          </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-            Is our pathway engine missing a degree, exam, institute, or target career? Help visitors discover optimal routes by submitting new nodes. All suggestions go straight to our review console!
-          </p>
-        </div>
 
-        <div className="shrink-0 w-full md:w-auto">
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => {
-              const footerEl = document.getElementById('footer');
-              if (footerEl) {
-                footerEl.scrollIntoView({ behavior: 'smooth' });
-              }
-            }}
-            className="w-full md:w-auto flex items-center justify-center space-x-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-brandCyan via-brandIndigo to-purple-500 text-white font-bold text-sm shadow-lg shadow-brandIndigo/25"
-          >
-            <PlusCircle className="w-4.5 h-4.5" />
-            <span>Suggest Pathway Opportunity</span>
-          </motion.button>
-        </div>
+          {/* Right Column: Live Path Tracker widget */}
+          <div className="lg:col-span-5 flex justify-center items-center">
+            <div className="relative w-full max-w-[380px] glass p-6 rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-900/60 shadow-2xl overflow-hidden">
+              <div className="flex justify-between items-center border-b border-white/5 pb-4 mb-4">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-brandCyan bg-brandCyan/10 border border-brandCyan/20 px-2 py-0.5 rounded-md">
+                  Pathway Simulation
+                </span>
+                <span className="flex items-center space-x-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                  <span className="text-[10px] text-slate-400">Live Tracker</span>
+                </span>
+              </div>
+
+              {/* Steps rendering */}
+              <div className="space-y-4 relative">
+                {/* Connecting line */}
+                <div className="absolute left-[22px] top-6 bottom-6 w-0.5 bg-slate-800" />
+                {/* Moving glow dot */}
+                <motion.div
+                  animate={{ y: activeTrackerStep * 56 + 12 }}
+                  transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+                  className="absolute left-[20px] w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee] z-10"
+                />
+
+                {trackerSteps.map((step, idx) => {
+                  const isActive = activeTrackerStep === idx;
+                  const StepIcon = step.icon;
+
+                  return (
+                    <motion.div
+                      key={idx}
+                      animate={{ scale: isActive ? 1.02 : 1, opacity: isActive ? 1 : 0.6 }}
+                      className={`flex items-center space-x-4 p-2.5 rounded-xl transition-all ${
+                        isActive ? 'bg-white/5 border border-white/5 shadow-inner' : 'border border-transparent'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border border-white/5 ${step.color}`}>
+                        <StepIcon className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-slate-500 block uppercase font-mono tracking-wide">{step.title}</span>
+                        <span className="text-xs font-bold text-white truncate block">{step.detail}</span>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Dynamic Capability Tabs Showcase */}
+        <motion.div variants={itemVariants} className="space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white">Capabilities Showcase</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Interactive systems built to match students to target portfolios. Toggle tabs below to test live components.
+            </p>
+          </div>
+
+          {/* Tabs header */}
+          <div className="flex justify-center">
+            <div className="flex bg-slate-100 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200 dark:border-white/5 max-w-lg w-full">
+              {[
+                { id: 'pathfinder', label: 'Path Finder' },
+                { id: 'explorer', label: 'Interactive Explorer' },
+                { id: 'compare', label: 'College Matrix' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex-1 text-center py-2 rounded-xl text-xs font-bold transition-all ${
+                    activeTab === tab.id
+                      ? 'bg-gradient-to-r from-brandCyan to-brandIndigo text-white shadow-lg'
+                      : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tabs Body / Mockups */}
+          <div className="glass max-w-4xl mx-auto rounded-3xl border border-slate-200 dark:border-white/5 bg-[#090D16]/40 p-6 md:p-10 shadow-2xl relative min-h-[300px] flex items-center justify-center overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-10" />
+
+            <AnimatePresence mode="wait">
+              {activeTab === 'pathfinder' && (
+                <motion.div
+                  key="pathfinder"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full flex flex-col md:flex-row items-center justify-around gap-6 py-6"
+                >
+                  {/* Step 1 */}
+                  <div className="glass p-4 rounded-2xl border border-white/5 bg-[#0E1524] text-center w-40">
+                    <span className="text-[10px] text-amber-500 font-mono">STEP 1</span>
+                    <h4 className="text-xs font-bold text-white mt-1">Class 12 Commerce</h4>
+                  </div>
+                  {/* Connect arrow */}
+                  <ArrowRight className="w-5 h-5 text-brandCyan animate-pulse rotate-90 md:rotate-0" />
+                  {/* Step 2 */}
+                  <div className="glass p-4 rounded-2xl border border-white/5 bg-[#0E1524] text-center w-40">
+                    <span className="text-[10px] text-blue-500 font-mono">STEP 2</span>
+                    <h4 className="text-xs font-bold text-white mt-1">B.Com Degree</h4>
+                  </div>
+                  {/* Connect arrow */}
+                  <ArrowRight className="w-5 h-5 text-brandCyan animate-pulse rotate-90 md:rotate-0" />
+                  {/* Step 3 */}
+                  <div className="glass p-4 rounded-2xl border border-white/5 bg-[#0E1524] text-center w-40">
+                    <span className="text-[10px] text-emerald-500 font-mono">GOAL</span>
+                    <h4 className="text-xs font-bold text-white mt-1">Financial Analyst</h4>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'explorer' && (
+                <motion.div
+                  key="explorer"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full flex flex-col items-center py-4 space-y-6"
+                >
+                  {/* Root Node */}
+                  <div className="glass p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-[#0E1524] text-center w-48 relative">
+                    <span className="text-[8px] bg-blue-500/10 border border-blue-500/25 px-1.5 py-0.5 rounded text-blue-400 font-bold uppercase">Root Milestone</span>
+                    <h4 className="text-xs font-bold text-white mt-2">B.Tech Degree</h4>
+                    <button
+                      onClick={() => setExplorerMockExpanded(!explorerMockExpanded)}
+                      className="mt-3 text-[10px] font-bold text-cyan-400 hover:underline flex items-center justify-center mx-auto space-x-1"
+                    >
+                      <span>{explorerMockExpanded ? '- Collapse Node' : '+ Expand Node'}</span>
+                    </button>
+                  </div>
+
+                  {/* Dynamic sub branches */}
+                  <AnimatePresence>
+                    {explorerMockExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="flex flex-col md:flex-row items-center justify-center gap-4 w-full"
+                      >
+                        {['Software Engineer', 'Data Scientist', 'DevOps Specialist'].map((role, idx) => (
+                          <motion.div
+                            key={idx}
+                            initial={{ y: 10, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: idx * 0.1 }}
+                            className="glass p-3 rounded-xl border border-white/5 bg-slate-900/80 text-center w-36"
+                          >
+                            <span className="text-[9px] text-emerald-400 font-bold font-mono">CAREER</span>
+                            <h5 className="text-[11px] font-bold text-slate-300 mt-1">{role}</h5>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+
+              {activeTab === 'compare' && (
+                <motion.div
+                  key="compare"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full overflow-x-auto py-2"
+                >
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="border-b border-white/5 text-[9px] text-slate-500 uppercase font-bold tracking-wider">
+                        <th className="py-2.5 px-4">Institute</th>
+                        <th className="py-2.5 px-4">NIRF Rank</th>
+                        <th className="py-2.5 px-4">Annual Fees</th>
+                        <th className="py-2.5 px-4 text-center">Placements</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-slate-350">
+                      {[
+                        { name: 'IIT Delhi', rank: '#2', fees: '₹2.2L', placement: '96%' },
+                        { name: 'BITS Pilani', rank: '#25', fees: '₹4.8L', placement: '92%' },
+                        { name: 'VIT Vellore', rank: '#11', fees: '₹3.9L', placement: '87%' },
+                      ].map((mock, i) => (
+                        <tr key={i} className="hover:bg-white/5 transition-all">
+                          <td className="py-3 px-4 font-bold text-white">{mock.name}</td>
+                          <td className="py-3 px-4 text-amber-400 font-bold">{mock.rank}</td>
+                          <td className="py-3 px-4 text-emerald-400 font-bold">{mock.fees}</td>
+                          <td className="py-3 px-4 text-center font-bold text-cyan-400">{mock.placement}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+
+        {/* Premium Statistics Metrics Section */}
+        <motion.div variants={itemVariants} className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {statsItems.map((stat, i) => {
+              const StatIcon = stat.icon;
+              return (
+                <motion.div
+                  key={i}
+                  whileHover={{ y: -4 }}
+                  className={`glass p-5 rounded-2xl border border-slate-200 dark:border-white/5 bg-white/40 dark:bg-[#0A0E1A]/40 flex flex-col items-center text-center shadow-md transition-all duration-300 ${stat.border}`}
+                >
+                  <div className="p-2.5 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl mb-3 shrink-0">
+                    <StatIcon className="w-5 h-5 text-cyan-500" />
+                  </div>
+                  <h3 className="text-3xl font-black text-slate-900 dark:text-white">{stat.count}</h3>
+                  <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 mt-1 uppercase tracking-wider font-mono">{stat.label}</h4>
+                  <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">{stat.desc}</p>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Collapsible FAQ Section */}
+        <motion.div variants={itemVariants} className="space-y-8 max-w-3xl mx-auto w-full">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white">Frequently Asked Questions</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Everything you need to know about the Career Atlas pathway engine.</p>
+          </div>
+
+          <div className="space-y-3">
+            {faqs.map((faq, idx) => {
+              const isOpen = openFaq === idx;
+              return (
+                <div
+                  key={idx}
+                  className="glass rounded-2xl border border-slate-200 dark:border-white/5 bg-white/45 dark:bg-[#0B101D]/45 overflow-hidden transition-all shadow-sm"
+                >
+                  <button
+                    onClick={() => setOpenFaq(isOpen ? null : idx)}
+                    className="w-full flex items-center justify-between p-4.5 text-left text-xs sm:text-sm font-bold text-slate-900 dark:text-white hover:bg-slate-50 hover:dark:bg-white/3 transition-colors"
+                  >
+                    <span className="mr-4 leading-snug">{faq.q}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300 ${
+                        isOpen ? 'rotate-180 text-brandCyan' : ''
+                      }`}
+                    />
+                  </button>
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <div className="p-4.5 pt-0 border-t border-slate-200/50 dark:border-white/5 text-xs text-slate-655 dark:text-slate-400 leading-relaxed">
+                          {faq.a}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Contribution Portal Section */}
+        <motion.div
+          variants={itemVariants}
+          className="glass rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-white/10 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-[#0B101D] dark:to-[#0F1629] shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brandIndigo/5 rounded-full filter blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full filter blur-3xl pointer-events-none" />
+
+          <div className="space-y-4 max-w-xl text-left">
+            <div className="flex items-center space-x-2 text-brandCyan dark:text-brandCyan font-semibold">
+              <Sparkles className="w-5 h-5 text-brandCyan" />
+              <span className="text-xs uppercase tracking-wider">Crowdsourced Repository</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Contribute to Career Atlas
+            </h2>
+            <p className="text-sm text-slate-650 dark:text-slate-400 leading-relaxed">
+              Is our pathway engine missing a degree, exam, institute, or target career? Help visitors discover optimal routes by submitting new nodes. All suggestions go straight to our review console!
+            </p>
+          </div>
+
+          <div className="shrink-0 w-full md:w-auto">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => {
+                const footerEl = document.getElementById('footer');
+                if (footerEl) {
+                  footerEl.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="w-full md:w-auto flex items-center justify-center space-x-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-brandCyan via-brandIndigo to-purple-500 text-white font-bold text-sm shadow-lg shadow-brandIndigo/25"
+            >
+              <PlusCircle className="w-4.5 h-4.5" />
+              <span>Suggest Pathway Opportunity</span>
+            </motion.button>
+          </div>
+        </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
 
