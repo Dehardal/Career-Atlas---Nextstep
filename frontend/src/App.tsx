@@ -13,6 +13,7 @@ import CareerPage from './features/careers/CareerPage';
 import DegreePage from './features/degrees/DegreePage';
 import ExamPage from './features/exams/ExamPage';
 import InstitutePage from './features/institutes/InstitutePage';
+import DashboardPage from './features/dashboard/DashboardPage';
 
 // Admin Pages
 import { AdminSuggestionsPage } from './features/admin/AdminSuggestionsPage';
@@ -52,6 +53,7 @@ export const App: React.FC = () => {
           <Route path="degrees" element={<DegreePage />} />
           <Route path="exams" element={<ExamPage />} />
           <Route path="institutes" element={<InstitutePage />} />
+          <Route path="dashboard" element={<DashboardPage />} />
         </Route>
 
         {/* ADMIN APPLICATION */}

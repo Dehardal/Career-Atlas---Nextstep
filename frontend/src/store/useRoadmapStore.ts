@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { api } from '../services/api';
-import type { Node, RoadmapPath, Relationship } from '../services/api';
+import type { Node, RoadmapPath, Relationship, SavedRoadmap, Bookmark } from '../services/api';
 
 interface RoadmapState {
   startNode: Node | null;
@@ -23,6 +23,10 @@ interface RoadmapState {
   // Auth State
   user: { name: string; email: string; avatar: string; role: 'STUDENT' | 'ADMIN' } | null;
 
+  // Saved Roadmaps & Bookmarks State
+  savedRoadmaps: SavedRoadmap[];
+  bookmarks: Bookmark[];
+
   setStartNode: (node: Node | null) => void;
   setTargetNode: (node: Node | null) => void;
   setSelectedPathIndex: (index: number) => void;
@@ -40,6 +44,13 @@ interface RoadmapState {
   // Auth Actions
   loginWithGoogle: (email: string, name: string, role: 'STUDENT' | 'ADMIN') => void;
   logout: () => void;
+
+  // Saved Roadmaps & Bookmarks Actions
+  fetchUserDashboard: () => Promise<void>;
+  saveRoadmap: (title: string, description?: string) => Promise<void>;
+  deleteSavedRoadmap: (id: string) => Promise<void>;
+  addBookmark: (nodeId: string, notes?: string) => Promise<void>;
+  deleteBookmark: (id: string) => Promise<void>;
 }
 
 export const useRoadmapStore = create<RoadmapState>((set, get) => ({
@@ -57,6 +68,10 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
   explorerRelationships: [],
   expandedNodeIds: [],
   theme: (localStorage.getItem('theme') as 'dark' | 'light') || 'dark',
+
+  // Saved Roadmaps & Bookmarks Initial
+  savedRoadmaps: [],
+  bookmarks: [],
 
   // Auth State Init
   user: (() => {
@@ -114,7 +129,9 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
     viewMode: 'PATH',
     explorerNodes: [],
     explorerRelationships: [],
-    expandedNodeIds: []
+    expandedNodeIds: [],
+    savedRoadmaps: [],
+    bookmarks: []
   }),
 
   // Explorer Actions Implementations
@@ -297,10 +314,81 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
     const user = { name, email, avatar, role };
     localStorage.setItem('user', JSON.stringify(user));
     set({ user });
+    get().fetchUserDashboard();
   },
   logout: () => {
     localStorage.removeItem('user');
-    set({ user: null });
+    set({ user: null, savedRoadmaps: [], bookmarks: [] });
+  },
+
+  // Saved Roadmaps & Bookmarks implementation
+  fetchUserDashboard: async () => {
+    const { user } = get();
+    if (!user) return;
+    set({ loading: true, error: null });
+    try {
+      const [roadmaps, bookmarks] = await Promise.all([
+        api.getSavedRoadmaps(user.email),
+        api.getBookmarks(user.email)
+      ]);
+      set({ savedRoadmaps: roadmaps, bookmarks, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.error || 'Failed to fetch dashboard data', loading: false });
+    }
+  },
+  saveRoadmap: async (title: string, description?: string) => {
+    const { user, pathways, selectedPathIndex } = get();
+    if (!user) return;
+    const path = pathways[selectedPathIndex];
+    if (!path) return;
+
+    const nodeSequence = path.steps.map((s) => s.node._id);
+    const relationshipSequence = path.steps
+      .map((s) => s.relationship?._id)
+      .filter((id): id is string => !!id);
+
+    set({ loading: true, error: null });
+    try {
+      await api.saveRoadmap({
+        email: user.email,
+        title,
+        description,
+        nodeSequence,
+        relationshipSequence
+      });
+      await get().fetchUserDashboard();
+    } catch (err: any) {
+      set({ error: err.response?.data?.error || 'Failed to save roadmap', loading: false });
+    }
+  },
+  deleteSavedRoadmap: async (id: string) => {
+    set({ loading: true, error: null });
+    try {
+      await api.deleteSavedRoadmap(id);
+      await get().fetchUserDashboard();
+    } catch (err: any) {
+      set({ error: err.response?.data?.error || 'Failed to delete roadmap', loading: false });
+    }
+  },
+  addBookmark: async (nodeId: string, notes?: string) => {
+    const { user } = get();
+    if (!user) return;
+    set({ loading: true, error: null });
+    try {
+      await api.addBookmark({ email: user.email, nodeId, notes });
+      await get().fetchUserDashboard();
+    } catch (err: any) {
+      set({ error: err.response?.data?.error || 'Failed to add bookmark', loading: false });
+    }
+  },
+  deleteBookmark: async (id: string) => {
+    set({ loading: true, error: null });
+    try {
+      await api.deleteBookmark(id);
+      await get().fetchUserDashboard();
+    } catch (err: any) {
+      set({ error: err.response?.data?.error || 'Failed to delete bookmark', loading: false });
+    }
   }
 }));
 export default useRoadmapStore;

@@ -8,16 +8,20 @@ import {
   DollarSign, 
   Clock, 
   Award, 
-  ExternalLink,
-  MapPin,
-  HelpCircle,
-  X,
-  TrendingUp,
-  Landmark,
-  Search,
-  Briefcase,
-  Lock,
-  LogIn
+  ExternalLink, 
+  MapPin, 
+  HelpCircle, 
+  X, 
+  TrendingUp, 
+  Landmark, 
+  Search, 
+  Briefcase, 
+  Lock, 
+  LogIn,
+  Bookmark as BookmarkIcon,
+  Star,
+  Save,
+  ChevronRight
 } from 'lucide-react';
 import { useRoadmapStore } from '../../store/useRoadmapStore';
 import { api } from '../../services/api';
@@ -49,13 +53,33 @@ export const RoadmapPage: React.FC = () => {
     expandNode,
     collapseNode,
     resetExplorer,
-    user
+    user,
+    bookmarks,
+    saveRoadmap,
+    addBookmark,
+    deleteBookmark
   } = useRoadmapStore();
 
   const [qualifications, setQualifications] = useState<ApiNode[]>([]);
   const [careers, setCareers] = useState<ApiNode[]>([]);
   const [streams, setStreams] = useState<ApiNode[]>([]);
   const [selectedNode, setSelectedNode] = useState<ApiNode | null>(null);
+
+  // Eligibility Rules state for warnings
+  const [eligibilityRules, setEligibilityRules] = useState<any[]>([]);
+
+  // Drawer & Comparison states
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedState, setSelectedState] = useState('ALL');
+  const [selectedOwnership, setSelectedOwnership] = useState('ALL');
+  const [maxFees, setMaxFees] = useState(2000000);
+  const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [comparisonOpen, setComparisonOpen] = useState(false);
+
+  // Save Pathway states
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [saveTitle, setSaveTitle] = useState('');
+  const [saveDescription, setSaveDescription] = useState('');
 
   // Fetch offering colleges when a DEGREE node is selected
   const [offeringColleges, setOfferingColleges] = useState<InstituteCourseMapping[]>([]);
@@ -81,18 +105,20 @@ export const RoadmapPage: React.FC = () => {
     }
   }, [selectedNode]);
 
-  // Load dropdown options for inline selection
+  // Load dropdown options for inline selection and rules
   useEffect(() => {
     const loadDropdowns = async () => {
       try {
         const qualsRes = await api.getNodes({ type: 'QUALIFICATION', limit: 100 });
         const careersRes = await api.getNodes({ type: 'OCCUPATION', limit: 100 });
         const streamsRes = await api.getNodes({ type: 'STREAM', limit: 100 });
+        const rulesRes = await api.getEligibilityRules();
         setQualifications(qualsRes.nodes);
         setCareers(careersRes.nodes);
         setStreams(streamsRes.nodes);
+        setEligibilityRules(rulesRes);
       } catch (err) {
-        console.error('Failed to load dropdown options', err);
+        console.error('Failed to load dropdown options or rules', err);
       }
     };
     loadDropdowns();
@@ -149,6 +175,63 @@ export const RoadmapPage: React.FC = () => {
     setTargetNode(nodeObj);
     setSelectedNode(null);
   };
+
+  const handleBookmarkToggle = () => {
+    if (!selectedNode) return;
+    const isBookmarked = bookmarks.some(
+      (b) => b.nodeId?._id === selectedNode._id || (typeof b.nodeId === 'string' && b.nodeId === selectedNode._id)
+    );
+    if (isBookmarked) {
+      const b = bookmarks.find(
+        (b) => b.nodeId?._id === selectedNode._id || (typeof b.nodeId === 'string' && b.nodeId === selectedNode._id)
+      );
+      if (b) deleteBookmark(b._id);
+    } else {
+      addBookmark(selectedNode._id);
+    }
+  };
+
+  const handleToggleCompare = (id: string) => {
+    if (compareIds.includes(id)) {
+      setCompareIds(compareIds.filter((cid) => cid !== id));
+    } else {
+      if (compareIds.length >= 3) {
+        alert('You can compare up to 3 colleges at once.');
+        return;
+      }
+      setCompareIds([...compareIds, id]);
+    }
+  };
+
+  const handleSaveRoadmap = async () => {
+    if (!saveTitle.trim()) return;
+    try {
+      await saveRoadmap(saveTitle, saveDescription);
+      setSaveModalOpen(false);
+      setSaveTitle('');
+      setSaveDescription('');
+    } catch (err) {
+      console.error('Failed to save roadmap', err);
+    }
+  };
+
+  // Reset comparison when selecting a new node
+  useEffect(() => {
+    setCompareIds([]);
+    setDrawerOpen(false);
+  }, [selectedNode]);
+
+  // Derived filtered colleges list
+  const filteredColleges = offeringColleges.filter((col) => {
+    const matchesState = selectedState === 'ALL' || col.institute?.location?.state === selectedState;
+    const matchesOwnership =
+      selectedOwnership === 'ALL' ||
+      col.institute?.ownership?.toUpperCase() === selectedOwnership.toUpperCase();
+    const matchesFees = !col.fees || col.fees <= maxFees;
+    return matchesState && matchesOwnership && matchesFees;
+  });
+
+  const comparedColleges = offeringColleges.filter((col) => compareIds.includes(col._id));
 
   const startOptions = [
     ...qualifications.filter((q) => q.name !== 'Class 12').map((q) => ({
@@ -295,6 +378,19 @@ export const RoadmapPage: React.FC = () => {
           </div>
         )}
 
+        {/* Save Roadmap Pathway button */}
+        {viewMode === 'PATH' && pathways.length > 0 && user && (
+          <div className="pt-2">
+            <button
+              onClick={() => setSaveModalOpen(true)}
+              className="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl border border-brandCyan/30 hover:border-brandCyan/60 hover:bg-brandCyan/5 text-brandCyan text-xs font-bold transition-all"
+            >
+              <Save className="w-4 h-4" />
+              <span>Save Active Pathway</span>
+            </button>
+          </div>
+        )}
+
         {/* Explorer Actions */}
         {viewMode === 'EXPLORER' && startNode && (
           <div className="space-y-3 border-t border-slate-200 dark:border-white/5 pt-4">
@@ -382,6 +478,7 @@ export const RoadmapPage: React.FC = () => {
                   }
                 }}
                 startNodeId={startNode?._id}
+                rules={eligibilityRules}
               />
 
               {/* Quick Tutorial Overlay banner */}
@@ -493,7 +590,24 @@ export const RoadmapPage: React.FC = () => {
 
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">{selectedNode.name}</h3>
+                <div className="flex justify-between items-start gap-4">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white leading-tight flex-1 mr-2">
+                    {selectedNode.name}
+                  </h3>
+                  {user && (
+                    <button
+                      onClick={handleBookmarkToggle}
+                      className={`p-1.5 rounded-lg border transition-all shrink-0 ${
+                        bookmarks.some((b) => b.nodeId?._id === selectedNode._id || (typeof b.nodeId === 'string' && b.nodeId === selectedNode._id))
+                          ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20'
+                          : 'border-slate-200 dark:border-white/10 text-slate-400 hover:text-amber-500 hover:bg-slate-100 hover:dark:bg-white/5'
+                      }`}
+                      title="Bookmark Item"
+                    >
+                      <Star className={`w-4 h-4 ${bookmarks.some((b) => b.nodeId?._id === selectedNode._id || (typeof b.nodeId === 'string' && b.nodeId === selectedNode._id)) ? 'fill-amber-500' : ''}`} />
+                    </button>
+                  )}
+                </div>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">{selectedNode.description}</p>
               </div>
 
@@ -549,55 +663,25 @@ export const RoadmapPage: React.FC = () => {
                         <span className="text-sm font-bold text-slate-800 dark:text-white">{selectedNode.level}</span>
                       </div>
                     </div>
-
-                    {/* Offering Colleges list */}
-                    <div className="space-y-2.5">
+                    {/* Offering Colleges Drawer Launcher */}
+                    <div className="pt-4 border-t border-slate-200 dark:border-white/5 space-y-3">
                       <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center space-x-1.5">
-                        <Landmark className="w-4 h-4 text-cyan-600 dark:text-brandCyan" />
-                        <span>Top Colleges & Institutes ({offeringColleges.length})</span>
+                        <Landmark className="w-4.5 h-4.5 text-cyan-600 dark:text-brandCyan" />
+                        <span>Colleges & Admissions</span>
                       </h4>
-
-                      {collegesLoading ? (
-                        <div className="text-xs text-slate-500 dark:text-slate-400 animate-pulse py-2">
-                          Retrieving college profiles...
-                        </div>
-                      ) : offeringColleges.length === 0 ? (
-                        <div className="text-xs text-slate-500 dark:text-slate-400 italic py-2">
-                          No colleges registered for this degree course.
-                        </div>
-                      ) : (
-                        <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                          {offeringColleges.map((mapping) => (
-                            <div 
-                              key={mapping._id}
-                              className="bg-slate-100 hover:bg-slate-200 dark:bg-[#0E1524]/60 dark:hover:bg-[#121B2F] border border-slate-200 dark:border-white/5 p-3 rounded-xl transition-all space-y-1.5 group relative"
-                            >
-                              <div className="flex justify-between items-start">
-                                <span className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-brandCyan transition-colors">
-                                  {mapping.institute?.name}
-                                </span>
-                                {mapping.institute?.nirfRanking && (
-                                  <span className="text-[9px] bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 px-1.5 py-0.5 rounded font-mono shrink-0 ml-1">
-                                    NIRF #{mapping.institute.nirfRanking}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-[10px] text-slate-600 dark:text-slate-400 flex items-center space-x-1">
-                                <MapPin className="w-3 h-3 text-cyan-600 dark:text-cyan-500" />
-                                <span>{mapping.institute?.location?.city}, {mapping.institute?.location?.state}</span>
-                              </div>
-                              <div className="pt-1 border-t border-slate-200 dark:border-white/5 flex justify-between text-[9px] text-slate-500">
-                                <span>Spec: <strong className="text-teal-700 dark:text-teal-400">{mapping.specialization}</strong></span>
-                                <span>Exam: <strong className="text-blue-700 dark:text-blue-400">{mapping.entranceExam?.name || 'Direct'}</strong></span>
-                              </div>
-                              <div className="flex justify-between text-[9px] text-slate-500">
-                                <span>Fees: <strong className="text-slate-800 dark:text-slate-300">{mapping.fees ? `₹${(mapping.fees / 100000).toFixed(2)}L` : 'N/A'}</strong></span>
-                                <span>Seats: <strong className="text-slate-800 dark:text-slate-300">{mapping.seats || 'N/A'}</strong></span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <button
+                        onClick={() => {
+                          setSelectedState('ALL');
+                          setSelectedOwnership('ALL');
+                          setMaxFees(2000000);
+                          setCompareIds([]);
+                          setDrawerOpen(true);
+                        }}
+                        className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all shadow-md"
+                      >
+                        <Search className="w-4 h-4" />
+                        <span>Compare & Match Colleges ({offeringColleges.length})</span>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -721,6 +805,414 @@ export const RoadmapPage: React.FC = () => {
               </div>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* College Matcher Side Drawer */}
+      <AnimatePresence>
+        {drawerOpen && selectedNode && (
+          <div className="fixed inset-0 z-50 flex justify-end">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDrawerOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="relative w-full max-w-lg bg-[#090D16] border-l border-white/10 shadow-2xl h-full flex flex-col z-10"
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-white/5 flex items-center justify-between shrink-0">
+                <div className="flex items-center space-x-2.5">
+                  <Landmark className="w-5 h-5 text-cyan-455 text-cyan-400" />
+                  <div>
+                    <h3 className="text-base font-bold text-white leading-tight">
+                      Explore Offering Colleges
+                    </h3>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      For <span className="text-cyan-400 font-semibold">{selectedNode.name}</span>
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setDrawerOpen(false)}
+                  className="p-1 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Filters */}
+              <div className="p-4 bg-[#0E1524]/60 border-b border-white/5 space-y-3 shrink-0">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Filters & Matcher Settings
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* State Select */}
+                  <div>
+                    <label className="block text-[10px] text-slate-500 mb-1">State</label>
+                    <select
+                      value={selectedState}
+                      onChange={(e) => setSelectedState(e.target.value)}
+                      className="w-full bg-[#0E1524] border border-white/10 text-xs text-white rounded-lg p-2 focus:outline-none focus:border-cyan-400"
+                    >
+                      <option value="ALL">All States</option>
+                      {Array.from(new Set(offeringColleges.map((c) => c.institute?.location?.state).filter(Boolean))).map((state) => (
+                        <option key={state} value={state}>{state}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Ownership Select */}
+                  <div>
+                    <label className="block text-[10px] text-slate-500 mb-1">Ownership</label>
+                    <select
+                      value={selectedOwnership}
+                      onChange={(e) => setSelectedOwnership(e.target.value)}
+                      className="w-full bg-[#0E1524] border border-white/10 text-xs text-white rounded-lg p-2 focus:outline-none focus:border-cyan-400"
+                    >
+                      <option value="ALL">All Categories</option>
+                      <option value="GOVERNMENT">Government</option>
+                      <option value="PRIVATE">Private</option>
+                    </select>
+                  </div>
+
+                  {/* Max Fees slider */}
+                  <div className="col-span-2 space-y-1 pt-1">
+                    <div className="flex justify-between text-[10px] text-slate-500">
+                      <span>Max Fees (Annual)</span>
+                      <span className="font-semibold text-cyan-450 text-cyan-400">
+                        {maxFees === 2000000 ? 'Any Budget' : `₹${(maxFees / 100000).toFixed(1)}L`}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="50000"
+                      max="2000000"
+                      step="50000"
+                      value={maxFees}
+                      onChange={(e) => setMaxFees(Number(e.target.value))}
+                      className="w-full accent-cyan-500 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Colleges List */}
+              <div className="flex-1 overflow-y-auto p-5 space-y-3">
+                {collegesLoading ? (
+                  <div className="text-center py-16 text-slate-500 text-xs animate-pulse">
+                    Retrieving college profiles...
+                  </div>
+                ) : filteredColleges.length === 0 ? (
+                  <div className="text-center py-16 text-slate-500 text-xs italic">
+                    No colleges match your filter criteria.
+                  </div>
+                ) : (
+                  filteredColleges.map((mapping) => {
+                    const isComparing = compareIds.includes(mapping._id);
+                    return (
+                      <div
+                        key={mapping._id}
+                        className={`bg-[#0E1524]/60 border p-4 rounded-2xl transition-all duration-200 ${
+                          isComparing
+                            ? 'border-cyan-500/50 bg-[#121b2f]/30'
+                            : 'border-white/5 hover:border-white/15'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="min-w-0">
+                            <div className="flex items-center space-x-1.5 flex-wrap">
+                              <h4 className="text-xs font-bold text-white leading-tight truncate max-w-[200px]">
+                                {mapping.institute?.name}
+                              </h4>
+                              {mapping.institute?.nirfRanking && (
+                                <span className="text-[8px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1 py-0.5 rounded font-mono shrink-0">
+                                  NIRF #{mapping.institute.nirfRanking}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-slate-400 mt-1 flex items-center space-x-1">
+                              <MapPin className="w-3 h-3 text-cyan-400" />
+                              <span className="truncate">{mapping.institute?.location?.city}, {mapping.institute?.location?.state}</span>
+                            </p>
+                          </div>
+
+                          {/* Compare Checkbox */}
+                          <label className="flex items-center space-x-1.5 cursor-pointer shrink-0">
+                            <input
+                              type="checkbox"
+                              checked={isComparing}
+                              onChange={() => handleToggleCompare(mapping._id)}
+                              className="w-4 h-4 accent-cyan-500 border-white/20 rounded focus:ring-0 cursor-pointer bg-slate-900"
+                            />
+                            <span className="text-[9px] font-bold text-slate-400 select-none">Compare</span>
+                          </label>
+                        </div>
+
+                        {/* Specs */}
+                        <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/5 text-[10px] text-slate-400">
+                          <div>
+                            <span className="text-[8px] block text-slate-500 uppercase font-mono">Specialization</span>
+                            <span className="font-semibold text-slate-200 truncate block">{mapping.specialization}</span>
+                          </div>
+                          <div>
+                            <span className="text-[8px] block text-slate-500 uppercase font-mono">Entrance Exam</span>
+                            <span className="font-semibold text-blue-400 truncate block">{mapping.entranceExam?.name || 'Direct'}</span>
+                          </div>
+                          <div>
+                            <span className="text-[8px] block text-slate-500 uppercase font-mono">Estimated Fees</span>
+                            <span className="font-semibold text-emerald-450 text-emerald-400">
+                              {mapping.fees ? `₹${(mapping.fees / 100000).toFixed(2)}L/yr` : 'N/A'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[8px] block text-slate-500 uppercase font-mono">Seats</span>
+                            <span className="font-semibold text-slate-200">{mapping.seats || 'N/A'}</span>
+                          </div>
+                        </div>
+
+                        {/* Placement stats */}
+                        {mapping.placementStats && (
+                          <div className="mt-2.5 pt-2 border-t border-dashed border-white/5 flex justify-between text-[9px] text-slate-500">
+                            <span>Placements: <strong className="text-teal-400">{mapping.placementStats.placementRate || 80}%</strong></span>
+                            <span>Avg Package: <strong className="text-slate-300">₹{(mapping.placementStats.averageSalary / 100000).toFixed(1)}L</strong></span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Comparison Footer Bar */}
+              {compareIds.length > 0 && (
+                <div className="p-4 border-t border-white/5 bg-[#090D16]/90 flex items-center justify-between shrink-0">
+                  <div className="text-xs text-slate-350 text-slate-300">
+                    <span className="font-semibold text-cyan-400">{compareIds.length}</span> / 3 selected for comparison
+                  </div>
+                  <button
+                    onClick={() => setComparisonOpen(true)}
+                    className="flex items-center space-x-1.5 py-2 px-4.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all shadow-md"
+                  >
+                    <span>Compare Matrix</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* College Comparison Matrix Modal */}
+      <AnimatePresence>
+        {comparisonOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setComparisonOpen(false)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-3xl bg-[#090D16] border border-white/10 rounded-2xl shadow-2xl p-6 overflow-hidden z-10 flex flex-col"
+              style={{ maxHeight: '80vh' }}
+            >
+              <div className="flex justify-between items-center pb-4 border-b border-white/5 shrink-0">
+                <h3 className="text-base font-bold text-white flex items-center space-x-2">
+                  <Landmark className="w-5 h-5 text-cyan-400" />
+                  <span>College Comparison Matrix</span>
+                </h3>
+                <button
+                  onClick={() => setComparisonOpen(false)}
+                  className="p-1 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Matrix Table */}
+              <div className="flex-1 overflow-auto mt-4 pr-1">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-white/5 text-[10px] text-slate-500 uppercase tracking-wider">
+                      <th className="py-3 px-4 min-w-[120px]">Parameter</th>
+                      {comparedColleges.map((col) => (
+                        <th key={col._id} className="py-3 px-4 min-w-[180px] text-cyan-400 font-bold">
+                          {col.institute?.name}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-white/5 hover:bg-white/5">
+                      <td className="py-3 px-4 text-slate-400 font-semibold">NIRF Rank</td>
+                      {comparedColleges.map((col) => (
+                        <td key={col._id} className="py-3 px-4 font-bold text-amber-400">
+                          {col.institute?.nirfRanking ? `#${col.institute.nirfRanking}` : 'N/A'}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5">
+                      <td className="py-3 px-4 text-slate-400 font-semibold">Location</td>
+                      {comparedColleges.map((col) => (
+                        <td key={col._id} className="py-3 px-4 text-slate-200">
+                          {col.institute?.location?.city}, {col.institute?.location?.state}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5">
+                      <td className="py-3 px-4 text-slate-400 font-semibold">Ownership</td>
+                      {comparedColleges.map((col) => (
+                        <td key={col._id} className="py-3 px-4 text-slate-200 uppercase text-[10px]">
+                          {col.institute?.ownership || 'N/A'}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5">
+                      <td className="py-3 px-4 text-slate-400 font-semibold">Annual Fees</td>
+                      {comparedColleges.map((col) => (
+                        <td key={col._id} className="py-3 px-4 font-bold text-emerald-400">
+                          {col.fees ? `₹${(col.fees / 100000).toFixed(2)}L` : 'N/A'}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5">
+                      <td className="py-3 px-4 text-slate-400 font-semibold">Specialization</td>
+                      {comparedColleges.map((col) => (
+                        <td key={col._id} className="py-3 px-4 text-slate-200 font-semibold">
+                          {col.specialization}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5">
+                      <td className="py-3 px-4 text-slate-400 font-semibold">Seats</td>
+                      {comparedColleges.map((col) => (
+                        <td key={col._id} className="py-3 px-4 text-slate-200">
+                          {col.seats || 'N/A'}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5">
+                      <td className="py-3 px-4 text-slate-400 font-semibold">Admission Gate</td>
+                      {comparedColleges.map((col) => (
+                        <td key={col._id} className="py-3 px-4 text-blue-400 font-semibold">
+                          {col.entranceExam?.name || 'Direct'}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-b border-white/5 hover:bg-white/5">
+                      <td className="py-3 px-4 text-slate-400 font-semibold">Placements</td>
+                      {comparedColleges.map((col) => (
+                        <td key={col._id} className="py-3 px-4 text-teal-400 font-bold">
+                          {col.placementStats?.placementRate ? `${col.placementStats.placementRate}%` : 'N/A'}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="hover:bg-white/5">
+                      <td className="py-3 px-4 text-slate-400 font-semibold">Avg Salary</td>
+                      {comparedColleges.map((col) => (
+                        <td key={col._id} className="py-3 px-4 font-bold text-slate-200">
+                          {col.placementStats?.averageSalary ? `₹${(col.placementStats.averageSalary / 100000).toFixed(1)}L` : 'N/A'}
+                        </td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Save Pathway Modal */}
+      <AnimatePresence>
+        {saveModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSaveModalOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-sm bg-[#090D16] border border-white/10 rounded-2xl shadow-2xl p-6 z-10 space-y-4"
+            >
+              <div className="flex justify-between items-center pb-2 border-b border-white/5">
+                <h3 className="text-sm font-bold text-white flex items-center space-x-1.5">
+                  <Save className="w-4 h-4 text-brandCyan" />
+                  <span>Save Pathway Planner</span>
+                </h3>
+                <button
+                  onClick={() => setSaveModalOpen(false)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[10px] text-slate-500 mb-1">Roadmap Title</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. My AI Engineer Path"
+                    value={saveTitle}
+                    onChange={(e) => setSaveTitle(e.target.value)}
+                    className="w-full bg-[#0E1524] border border-white/10 text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-500 mb-1">Notes / Description (Optional)</label>
+                  <textarea
+                    placeholder="Brief notes about your target timeline or classes..."
+                    value={saveDescription}
+                    onChange={(e) => setSaveDescription(e.target.value)}
+                    rows={3}
+                    className="w-full bg-[#0E1524] border border-white/10 text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-cyan-400 resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3 pt-2">
+                <button
+                  onClick={() => setSaveModalOpen(false)}
+                  className="flex-1 py-2 rounded-xl border border-white/10 text-slate-400 hover:text-white text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveRoadmap}
+                  disabled={!saveTitle.trim()}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+                    saveTitle.trim()
+                      ? 'bg-brandCyan hover:brightness-110 text-slate-950 font-bold'
+                      : 'bg-slate-800 text-slate-650 cursor-not-allowed'
+                  }`}
+                >
+                  Save Planner
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
 

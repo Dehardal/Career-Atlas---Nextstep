@@ -14,6 +14,9 @@ import instituteCourseRouter from './routes/instituteCourseRoutes';
 import recommendationRouter from './routes/recommendationRoutes';
 import validationRouter from './routes/validationRoutes';
 import suggestionRouter from './routes/suggestionRoutes';
+import userRouter from './routes/userRoutes';
+import savedRoadmapRouter from './routes/savedRoadmapRoutes';
+import bookmarkRouter from './routes/bookmarkRoutes';
 import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
@@ -41,6 +44,9 @@ app.use('/api/v1/institute-courses', instituteCourseRouter);
 app.use('/api/v1/recommendations', recommendationRouter);
 app.use('/api/v1/validation', validationRouter);
 app.use('/api/v1/suggestions', suggestionRouter);
+app.use('/api/v1/users', userRouter);
+app.use('/api/v1/saved-roadmaps', savedRoadmapRouter);
+app.use('/api/v1/bookmarks', bookmarkRouter);
 
 // Base health check
 app.get('/health', (req, res) => {

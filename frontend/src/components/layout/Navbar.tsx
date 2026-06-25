@@ -150,6 +150,15 @@ export const Navbar: React.FC = () => {
                       </div>
                     </div>
 
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 hover:dark:text-white hover:bg-slate-105 hover:dark:bg-white/5 border border-transparent transition-all"
+                    >
+                      <UserIcon className="w-4 h-4 text-emerald-650 dark:text-emerald-400" />
+                      <span>My Dashboard</span>
+                    </Link>
+
                     {user.role === 'ADMIN' && (
                       <Link
                         to="/admin"
@@ -228,6 +237,23 @@ export const Navbar: React.FC = () => {
                 </span>
               </div>
             </div>
+          )}
+
+          {user && (
+            <NavLink
+              to="/dashboard"
+              onClick={() => setIsOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center space-x-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-brandIndigo/10 dark:bg-brandIndigo/20 text-brandCyan border border-brandCyan/25'
+                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 hover:dark:text-white hover:bg-slate-100 hover:dark:bg-white/5'
+                }`
+              }
+            >
+              <UserIcon className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+              <span>My Dashboard</span>
+            </NavLink>
           )}
 
           {navItems.map((item) => (

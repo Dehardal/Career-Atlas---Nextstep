@@ -140,6 +140,41 @@ export interface Suggestion {
   updatedAt: string;
 }
 
+export interface SavedRoadmap {
+  _id: string;
+  userId: string;
+  title: string;
+  description: string;
+  nodeSequence: Node[];
+  relationshipSequence: Relationship[];
+  isCustom: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Bookmark {
+  _id: string;
+  userId: string;
+  nodeId: Node;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserProfile {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  profile: {
+    currentQualification?: any;
+    targetOccupation?: any;
+    completedSkills: any[];
+    preferredBoard?: any;
+    interests: string[];
+  };
+}
+
 export const api = {
   // Nodes CRUD / Search
   getNodes: async (params?: { type?: string; search?: string; page?: number; limit?: number }) => {
@@ -288,6 +323,50 @@ export const api = {
 
   deleteSuggestion: async (id: string) => {
     const response = await apiClient.delete<{ message: string }>(`/suggestions/${id}`);
+    return response.data;
+  },
+
+  // User Profile CRUD
+  getUserProfile: async (email: string) => {
+    const response = await apiClient.get<UserProfile>('/users/profile', { params: { email } });
+    return response.data;
+  },
+  updateUserProfile: async (profileData: { email: string; name?: string; role?: string; profile?: any }) => {
+    const response = await apiClient.put<UserProfile>('/users/profile', profileData);
+    return response.data;
+  },
+
+  // Saved Roadmaps CRUD
+  getSavedRoadmaps: async (email: string) => {
+    const response = await apiClient.get<SavedRoadmap[]>('/saved-roadmaps', { params: { email } });
+    return response.data;
+  },
+  saveRoadmap: async (roadmapData: {
+    email: string;
+    title: string;
+    description?: string;
+    nodeSequence: string[];
+    relationshipSequence: string[];
+  }) => {
+    const response = await apiClient.post<SavedRoadmap>('/saved-roadmaps', roadmapData);
+    return response.data;
+  },
+  deleteSavedRoadmap: async (id: string) => {
+    const response = await apiClient.delete<{ message: string }>(`/saved-roadmaps/${id}`);
+    return response.data;
+  },
+
+  // Bookmarks CRUD
+  getBookmarks: async (email: string) => {
+    const response = await apiClient.get<Bookmark[]>('/bookmarks', { params: { email } });
+    return response.data;
+  },
+  addBookmark: async (bookmarkData: { email: string; nodeId: string; notes?: string }) => {
+    const response = await apiClient.post<Bookmark>('/bookmarks', bookmarkData);
+    return response.data;
+  },
+  deleteBookmark: async (id: string) => {
+    const response = await apiClient.delete<{ message: string }>(`/bookmarks/${id}`);
     return response.data;
   }
 };

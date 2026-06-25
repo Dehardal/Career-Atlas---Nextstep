@@ -27,6 +27,7 @@ interface PathwayMapProps {
   expandedNodeIds?: string[];
   onExpandToggle?: (nodeId: string, expanded: boolean) => void;
   startNodeId?: string;
+  rules?: any[];
 }
 
 export const PathwayMap: React.FC<PathwayMapProps> = ({
@@ -38,6 +39,7 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
   expandedNodeIds = [],
   onExpandToggle,
   startNodeId,
+  rules = [],
 }) => {
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<any>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<any>([]);
@@ -67,6 +69,79 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
         reverseAdj.get(toId)!.push(fromId);
       }
     });
+
+    const checkEligibility = (fromId: string, toId: string): { eligible: boolean; exception?: string } => {
+      if (!rules || rules.length === 0) return { eligible: true };
+
+      const targetRules = rules.filter((rule) => {
+        const ruleTargetId = typeof rule.targetNode === 'string' 
+          ? rule.targetNode 
+          : rule.targetNode?._id || (rule.targetNode as any)?.toString();
+        return ruleTargetId === toId;
+      });
+
+      if (targetRules.length === 0) return { eligible: true };
+
+      const pathNodeIds = new Set<string>();
+      pathNodeIds.add(fromId);
+      const queue = [fromId];
+      const visited = new Set<string>([fromId]);
+      
+      while (queue.length > 0) {
+        const curr = queue.shift()!;
+        const parents = reverseAdj.get(curr) || [];
+        parents.forEach((pId) => {
+          if (!visited.has(pId)) {
+            visited.add(pId);
+            pathNodeIds.add(pId);
+            queue.push(pId);
+          }
+        });
+      }
+
+      const blockRules = targetRules.filter((rule) => rule.ruleType === 'BLOCK');
+      for (const rule of blockRules) {
+        const sourceId = typeof rule.sourceNode === 'string' 
+          ? rule.sourceNode 
+          : rule.sourceNode?._id || (rule.sourceNode as any)?.toString();
+        
+        if (pathNodeIds.has(sourceId)) {
+          return {
+            eligible: false,
+            exception: rule.exceptions || `Blocked: ${rule.sourceNode?.name || 'Prerequisite'} is in conflict.`
+          };
+        }
+      }
+
+      const allowRules = targetRules.filter((rule) => rule.ruleType === 'ALLOW');
+      if (allowRules.length === 0) return { eligible: true };
+
+      let satisfiedAnyAllow = false;
+      let firstAllowException = '';
+
+      for (const rule of allowRules) {
+        const sourceId = typeof rule.sourceNode === 'string' 
+          ? rule.sourceNode 
+          : rule.sourceNode?._id || (rule.sourceNode as any)?.toString();
+
+        if (pathNodeIds.has(sourceId)) {
+          satisfiedAnyAllow = true;
+          break;
+        }
+        if (!firstAllowException && rule.exceptions) {
+          firstAllowException = rule.exceptions;
+        }
+      }
+
+      if (!satisfiedAnyAllow) {
+        return {
+          eligible: false,
+          exception: firstAllowException || `Requires prerequisite: ${allowRules.map(r => r.sourceNode?.name || 'Required step').join(' or ')}.`
+        };
+      }
+
+      return { eligible: true };
+    };
 
     // 2. BFS Depth Assignment starting from the root node
     const depths = new Map<string, number>();
@@ -228,33 +303,54 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
         highlightedPathNodeIds.includes(toId) &&
         Math.abs(highlightedPathNodeIds.indexOf(fromId) - highlightedPathNodeIds.indexOf(toId)) === 1;
 
+      const eligibility = checkEligibility(fromId, toId);
+
       return {
         id: rel._id,
         source: fromId,
         target: toId,
-        animated: isPathEdge,
-        label: (() => {
-          switch (rel.type) {
-            case 'ELIGIBLE_FOR': return 'Eligible for';
-            case 'LEADS_TO': return 'Leads to';
-            case 'REQUIRES_EXAM': return 'Requires exam';
-            case 'OFFERED_BY': return 'Offered by';
-            default: return rel.type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-          }
-        })(),
-        labelStyle: { fill: theme === 'dark' ? '#94A3B8' : '#475569', fontSize: 10, fontWeight: 500 },
+        animated: isPathEdge && eligibility.eligible,
+        label: !eligibility.eligible ? (
+          <div 
+            title={eligibility.exception}
+            className="flex items-center space-x-1 px-1.5 py-0.5 rounded text-[10px] font-bold text-red-500 bg-red-100 dark:bg-red-950/80 border border-red-200 dark:border-red-900/50 cursor-help select-none"
+          >
+            <span>⚠️</span>
+            <span>Blocked</span>
+          </div>
+        ) : (
+          (() => {
+            switch (rel.type) {
+              case 'ELIGIBLE_FOR': return 'Eligible for';
+              case 'LEADS_TO': return 'Leads to';
+              case 'REQUIRES_EXAM': return 'Requires exam';
+              case 'OFFERED_BY': return 'Offered by';
+              default: return rel.type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+            }
+          })()
+        ),
+        labelStyle: !eligibility.eligible 
+          ? { display: 'none' } 
+          : { fill: theme === 'dark' ? '#94A3B8' : '#475569', fontSize: 10, fontWeight: 500 },
         labelBgPadding: [4, 2],
         labelBgBorderRadius: 4,
-        labelBgStyle: { fill: theme === 'dark' ? '#0E1524' : '#F8FAFC', fillOpacity: 0.85, stroke: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
+        labelBgStyle: !eligibility.eligible 
+          ? { fillOpacity: 0, strokeOpacity: 0 } 
+          : { fill: theme === 'dark' ? '#0E1524' : '#F8FAFC', fillOpacity: 0.85, stroke: theme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' },
         style: {
-          stroke: isPathEdge ? '#06B6D4' : 'rgba(148, 163, 184, 0.25)',
+          stroke: !eligibility.eligible 
+            ? '#EF4444' 
+            : (isPathEdge ? '#06B6D4' : 'rgba(148, 163, 184, 0.25)'),
           strokeWidth: isPathEdge ? 3 : 1.5,
+          strokeDasharray: !eligibility.eligible ? '5,5' : undefined,
         },
         markerEnd: {
           type: MarkerType.ArrowClosed,
           width: 20,
           height: 20,
-          color: isPathEdge ? '#06B6D4' : 'rgba(148, 163, 184, 0.25)',
+          color: !eligibility.eligible 
+            ? '#EF4444' 
+            : (isPathEdge ? '#06B6D4' : 'rgba(148, 163, 184, 0.25)'),
         },
       };
     });
@@ -272,6 +368,7 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
     viewMode,
     expandedNodeIds,
     onExpandToggle,
+    rules,
   ]);
 
   return (
