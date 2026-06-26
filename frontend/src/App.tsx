@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import PublicLayout from './components/layout/PublicLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import AdminGuard from './components/layout/AdminGuard';
-import RoleSwitcher from './components/layout/RoleSwitcher';
+
 
 // Public Pages
 import HomePage from './features/home/HomePage';
@@ -24,12 +24,6 @@ import AdminRulesPage from './features/admin/AdminRulesPage';
 import AdminMappingsPage from './features/admin/AdminMappingsPage';
 import AdminValidationPage from './features/admin/AdminValidationPage';
 
-// Helper component to display simulated role switcher only on admin pages
-const ConditionalRoleSwitcher: React.FC = () => {
-  const location = useLocation();
-  if (!location.pathname.startsWith('/admin')) return null;
-  return <RoleSwitcher />;
-};
 
 export const App: React.FC = () => {
   useEffect(() => {
@@ -80,7 +74,7 @@ export const App: React.FC = () => {
         </Route>
       </Routes>
 
-      <ConditionalRoleSwitcher />
+
     </Router>
   );
 };
