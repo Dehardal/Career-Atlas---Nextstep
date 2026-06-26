@@ -6,7 +6,7 @@ import { api } from '../../services/api';
 import { useRoadmapStore } from '../../store/useRoadmapStore';
 
 export const SuggestionModal: React.FC = () => {
-  const { suggestionModalOpen, setSuggestionModalOpen } = useRoadmapStore();
+  const { suggestionModalOpen, setSuggestionModalOpen, theme } = useRoadmapStore();
 
   // Form States
   const [visitorName, setVisitorName] = useState('');
@@ -98,7 +98,7 @@ export const SuggestionModal: React.FC = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={() => setSuggestionModalOpen(false)}
-          className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm"
         />
 
         {/* Modal Container */}
@@ -107,17 +107,17 @@ export const SuggestionModal: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', stiffness: 300, damping: 26 }}
-          className="relative w-full max-w-lg bg-[#0B1120] border border-white/10 rounded-2xl shadow-2xl p-6 overflow-hidden z-10 flex flex-col"
+          className="relative w-full max-w-lg bg-white dark:bg-[#0B1120] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 overflow-hidden z-10 flex flex-col transition-colors duration-300"
         >
-          {/* Ambient Glow mesh circles */}
-          <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-20 -left-20 w-48 h-48 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+          {/* Ambient Glow mesh circles (only visible or prominent in dark mode) */}
+          <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none opacity-50 dark:opacity-100" />
+          <div className="absolute -bottom-20 -left-20 w-48 h-48 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none opacity-50 dark:opacity-100" />
 
           {/* Header */}
-          <div className="flex justify-between items-center pb-4 border-b border-white/5 relative">
+          <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-white/5 relative">
             <div className="flex items-center space-x-2">
-              <Sparkles className="w-5 h-5 text-brandCyan animate-pulse" />
-              <h3 className="text-base font-bold text-white leading-tight">
+              <Sparkles className="w-5 h-5 text-cyan-600 dark:text-brandCyan animate-pulse" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
                 Suggest Pathway Opportunity
               </h3>
             </div>
@@ -127,7 +127,7 @@ export const SuggestionModal: React.FC = () => {
                 setSuccess(false);
                 setError('');
               }}
-              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors"
+              className="text-slate-400 hover:text-slate-900 dark:hover:text-white p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
               aria-label="Close modal"
             >
               <X className="w-4 h-4" />
@@ -142,12 +142,12 @@ export const SuggestionModal: React.FC = () => {
                 animate={{ opacity: 1 }}
                 className="text-center py-8 space-y-4"
               >
-                <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/25">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/25">
                   <CheckCircle className="w-6 h-6" />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-white">Suggestion Submitted Successfully!</h4>
-                  <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">Suggestion Submitted!</h4>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
                     Thank you for contributing to Career Atlas. Our administrative moderation team will review your proposal and update our roadmap catalog soon.
                   </p>
                 </div>
@@ -156,7 +156,7 @@ export const SuggestionModal: React.FC = () => {
                     setSuccess(false);
                     setError('');
                   }}
-                  className="mt-2 text-xs font-semibold text-brandCyan hover:underline"
+                  className="mt-2 text-xs font-semibold text-cyan-600 dark:text-brandCyan hover:underline"
                 >
                   Submit another suggestion
                 </button>
@@ -164,14 +164,14 @@ export const SuggestionModal: React.FC = () => {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
-                  <p className="text-xs text-red-400 font-medium bg-red-500/5 p-2 rounded border border-red-500/10">
+                  <p className="text-xs text-red-650 dark:text-red-400 font-medium bg-red-500/5 p-2 rounded border border-red-500/10">
                     {error}
                   </p>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 mb-1">
                       Your Name
                     </label>
                     <input
@@ -180,11 +180,11 @@ export const SuggestionModal: React.FC = () => {
                       value={visitorName}
                       onChange={(e) => setVisitorName(e.target.value)}
                       placeholder="e.g. Alex"
-                      className="w-full px-3 py-2 rounded-lg border border-white/10 bg-[#0E1524] text-white text-xs outline-none focus:border-brandCyan transition-colors"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0E1524] text-slate-800 dark:text-white text-xs outline-none focus:border-cyan-500 focus:bg-white dark:focus:bg-[#0E1524] transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 mb-1">
                       Email Address
                     </label>
                     <input
@@ -193,23 +193,23 @@ export const SuggestionModal: React.FC = () => {
                       value={visitorEmail}
                       onChange={(e) => setVisitorEmail(e.target.value)}
                       placeholder="e.g. alex@example.com"
-                      className="w-full px-3 py-2 rounded-lg border border-white/10 bg-[#0E1524] text-white text-xs outline-none focus:border-brandCyan transition-colors"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0E1524] text-slate-800 dark:text-white text-xs outline-none focus:border-cyan-500 focus:bg-white dark:focus:bg-[#0E1524] transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
                   <div className="sm:col-span-5">
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 mb-1">
                       Component Type
                     </label>
                     <select
                       value={type}
                       onChange={(e) => setType(e.target.value)}
-                      className="w-full px-2.5 py-2 rounded-lg border border-white/10 bg-[#0E1524] text-white text-xs outline-none cursor-pointer focus:border-brandCyan"
+                      className="w-full px-2.5 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0E1524] text-slate-850 dark:text-white text-xs outline-none cursor-pointer focus:border-cyan-500"
                     >
                       {opportunityTypes.map((item) => (
-                        <option key={item.value} value={item.value} className="bg-[#0B1120]">
+                        <option key={item.value} value={item.value} className="bg-white dark:bg-[#0B1120] text-slate-800 dark:text-white">
                           {item.label}
                         </option>
                       ))}
@@ -217,7 +217,7 @@ export const SuggestionModal: React.FC = () => {
                   </div>
 
                   <div className="sm:col-span-7">
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 mb-1">
                       Title Name
                     </label>
                     <input
@@ -226,13 +226,13 @@ export const SuggestionModal: React.FC = () => {
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="e.g. B.Des Fashion Design"
-                      className="w-full px-3 py-2 rounded-lg border border-white/10 bg-[#0E1524] text-white text-xs outline-none focus:border-brandCyan transition-colors"
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0E1524] text-slate-800 dark:text-white text-xs outline-none focus:border-cyan-500 focus:bg-white dark:focus:bg-[#0E1524] transition-colors"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-1">
+                  <label className="block text-[10px] uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 mb-1">
                     Description & Requirements
                   </label>
                   <textarea
@@ -241,15 +241,15 @@ export const SuggestionModal: React.FC = () => {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Provide details about prerequisites, career outcome, or subjects (min 10 chars)..."
-                    className="w-full px-3 py-2 rounded-lg border border-white/10 bg-[#0E1524] text-white text-xs outline-none resize-none focus:border-brandCyan transition-colors"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-[#0E1524] text-slate-800 dark:text-white text-xs outline-none resize-none focus:border-cyan-500 focus:bg-white dark:focus:bg-[#0E1524] transition-colors"
                   />
                 </div>
 
-                <div className="flex items-center justify-end space-x-3 pt-2 border-t border-white/5">
+                <div className="flex items-center justify-end space-x-3 pt-2 border-t border-slate-100 dark:border-white/5">
                   <button
                     type="button"
                     onClick={() => setSuggestionModalOpen(false)}
-                    className="px-4 py-2 rounded-lg border border-white/10 text-slate-400 hover:text-white text-xs font-semibold"
+                    className="px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 hover:dark:text-white text-xs font-semibold hover:bg-slate-50 hover:dark:bg-white/5 transition-colors"
                   >
                     Cancel
                   </button>
