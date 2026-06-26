@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Compass,
   Search,
@@ -22,6 +22,7 @@ import { AuthModal } from '../auth/AuthModal';
 
 export const Navbar: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [exploreOpen, setExploreOpen] = useState(false);
@@ -53,6 +54,9 @@ export const Navbar: React.FC = () => {
     { to: '/exams', label: 'Exams', icon: FileText },
     { to: '/institutes', label: 'Institutes', icon: Landmark },
   ];
+
+  const activeExploreItem = exploreItems.find(item => location.pathname === item.to);
+  const ExploreIcon = activeExploreItem ? activeExploreItem.icon : Compass;
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -112,14 +116,14 @@ export const Navbar: React.FC = () => {
               <div className="relative" ref={exploreDropdownRef}>
                 <button
                   onClick={() => setExploreOpen(!exploreOpen)}
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 outline-none ${
-                    exploreOpen || exploreItems.some(item => window.location.pathname === item.to)
-                      ? 'bg-brandIndigo/10 text-brandCyan dark:bg-brandIndigo/20 border border-brandCyan/10'
+                  className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 outline-none ${
+                    exploreOpen || activeExploreItem
+                      ? 'bg-brandIndigo/10 text-brandCyan dark:bg-brandIndigo/20 border border-brandCyan/10 shadow-glow'
                       : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 hover:dark:text-white hover:bg-slate-100 hover:dark:bg-white/5 border border-transparent'
                   }`}
                 >
-                  <Compass className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-                  <span>Explore</span>
+                  <ExploreIcon className={`w-4 h-4 transition-colors duration-300 ${exploreOpen || activeExploreItem ? 'text-brandCyan' : 'text-slate-400 dark:text-slate-500'}`} />
+                  <span>{activeExploreItem ? activeExploreItem.label : 'Explore'}</span>
                   <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-300 ${exploreOpen ? 'rotate-180 text-brandCyan' : ''}`} />
                 </button>
 
