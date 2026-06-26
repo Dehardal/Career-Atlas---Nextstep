@@ -187,10 +187,9 @@ export const HomePage: React.FC = () => {
                 Explore dynamic horizontal path timelines, analyze eligibility rules, discover matching colleges, and build custom visual educational structures.
               </motion.p>
 
-              {/* GPS Navigator Form */}
               <motion.div
                 variants={itemVariants}
-                className="glass p-6 sm:p-8 rounded-3xl w-full shadow-2xl border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#0C101D]/90 space-y-6 relative overflow-hidden"
+                className="glass p-6 sm:p-8 rounded-3xl w-full shadow-2xl border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#0C101D]/90 space-y-6 relative"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>

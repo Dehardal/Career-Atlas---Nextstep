@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, GraduationCap, ArrowRight, Loader2, MapPin, Sparkles } from 'lucide-react';
 import { api } from '../../services/api';
 import type { Node } from '../../services/api';
-import { useRoadmapStore } from '../../store/useRoadmapStore';
 
 interface StageSelectModalProps {
   isOpen: boolean;
@@ -50,7 +49,6 @@ export const StageSelectModal: React.FC<StageSelectModalProps> = ({
   targetCareer,
   onConfirm,
 }) => {
-  const { theme } = useRoadmapStore();
   const [qualifications, setQualifications] = useState<Node[]>([]);
   const [streams, setStreams] = useState<Node[]>([]);
   const [loading, setLoading] = useState(false);
