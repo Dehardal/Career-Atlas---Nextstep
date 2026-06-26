@@ -16,6 +16,7 @@ interface CustomDropdownProps {
   showSearch?: boolean;
   className?: string;
   menuWidthClass?: string;
+  direction?: 'up' | 'down';
 }
 
 export const CustomDropdown: React.FC<CustomDropdownProps> = ({
@@ -25,7 +26,8 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   placeholder = 'Select an option...',
   showSearch = false,
   className = '',
-  menuWidthClass = 'w-full'
+  menuWidthClass = 'w-full',
+  direction = 'down'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -85,11 +87,11 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: direction === 'up' ? 10 : -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: direction === 'up' ? 10 : -10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className={`absolute z-50 mt-2 ${menuWidthClass} bg-white/95 dark:bg-[#0D1322]/95 backdrop-blur-lg border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1.5`}
+            className={`absolute z-50 ${direction === 'up' ? 'bottom-full mb-2' : 'mt-2'} ${menuWidthClass} bg-white/95 dark:bg-[#0D1322]/95 backdrop-blur-lg border border-slate-200 dark:border-white/10 rounded-2xl shadow-xl overflow-hidden py-1.5`}
           >
             {/* Search Input */}
             {showSearch && (

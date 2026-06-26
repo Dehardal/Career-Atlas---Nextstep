@@ -202,6 +202,7 @@ export const HomePage: React.FC = () => {
                       onChange={setSelectedStart}
                       placeholder="Choose starting point..."
                       showSearch={true}
+                      direction="up"
                     />
                   </div>
 
@@ -215,6 +216,7 @@ export const HomePage: React.FC = () => {
                       onChange={setSelectedTarget}
                       placeholder="Choose a profession..."
                       showSearch={true}
+                      direction="up"
                     />
                   </div>
                 </div>
