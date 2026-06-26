@@ -324,14 +324,11 @@ export const InstitutePage: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="mt-6 pt-4 border-t border-slate-200 dark:border-white/5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                      <div className="mt-6 pt-4 border-t border-slate-200 dark:border-white/5 flex items-center text-xs text-slate-500 dark:text-slate-400">
                         <div className="flex items-center space-x-1">
                           <Shield className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           <span>Verified Profile</span>
                         </div>
-                        <span className="font-mono text-[9px] select-all bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300">
-                          {inst._id.substring(0, 8)}
-                        </span>
                       </div>
                     </div>
                   ))}

@@ -127,13 +127,6 @@ export const DegreePage: React.FC = () => {
                       {deg.description}
                     </p>
                   </div>
-
-                  <div className="mt-6 pt-4 border-t border-slate-200 dark:border-white/5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                    <span>Degree Course Code</span>
-                    <span className="font-mono text-[10px] select-all bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300">
-                      {deg._id.substring(0, 8)}...
-                    </span>
-                  </div>
                 </div>
               ))}
             </div>
