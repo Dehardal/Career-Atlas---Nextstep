@@ -18,7 +18,6 @@ import {
   Briefcase, 
   Lock, 
   LogIn,
-  Bookmark as BookmarkIcon,
   Star,
   Save,
   ChevronRight
@@ -983,7 +982,7 @@ export const RoadmapPage: React.FC = () => {
                         {mapping.placementStats && (
                           <div className="mt-2.5 pt-2 border-t border-dashed border-white/5 flex justify-between text-[9px] text-slate-500">
                             <span>Placements: <strong className="text-teal-400">{mapping.placementStats.placementRate || 80}%</strong></span>
-                            <span>Avg Package: <strong className="text-slate-300">₹{(mapping.placementStats.averageSalary / 100000).toFixed(1)}L</strong></span>
+                            <span>Avg Package: <strong className="text-slate-300">{mapping.placementStats.averageSalary ? `₹${(mapping.placementStats.averageSalary / 100000).toFixed(1)}L` : 'N/A'}</strong></span>
                           </div>
                         )}
                       </div>

@@ -11,12 +11,11 @@ import {
   Landmark, 
   ChevronRight, 
   Compass, 
-  User as UserIcon,
   Sparkles,
   ArrowRight
 } from 'lucide-react';
 import { useRoadmapStore } from '../../store/useRoadmapStore';
-import type { SavedRoadmap, Bookmark } from '../../services/api';
+import type { SavedRoadmap } from '../../services/api';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
