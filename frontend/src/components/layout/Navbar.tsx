@@ -24,10 +24,12 @@ export const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
 
   const { theme, toggleTheme, user, logout } = useRoadmapStore();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const exploreDropdownRef = useRef<HTMLDivElement>(null);
 
   const navItems = [
     { to: '/', label: 'Home', icon: Compass },
@@ -39,11 +41,27 @@ export const Navbar: React.FC = () => {
     { to: '/search', label: 'Search', icon: Search },
   ];
 
+  const mainNavItems = [
+    { to: '/', label: 'Home', icon: Compass },
+    { to: '/roadmap', label: 'Roadmap Explorer', icon: Compass },
+    { to: '/search', label: 'Search', icon: Search },
+  ];
+
+  const exploreItems = [
+    { to: '/careers', label: 'Careers', icon: Briefcase },
+    { to: '/degrees', label: 'Degrees', icon: GraduationCap },
+    { to: '/exams', label: 'Exams', icon: FileText },
+    { to: '/institutes', label: 'Institutes', icon: Landmark },
+  ];
+
   // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setProfileOpen(false);
+      }
+      if (exploreDropdownRef.current && !exploreDropdownRef.current.contains(event.target as Node)) {
+        setExploreOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -72,8 +90,63 @@ export const Navbar: React.FC = () => {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-4">
-            <div className="flex space-x-1">
-              {navItems.map((item) => (
+            <div className="flex space-x-1 items-center">
+              {mainNavItems.slice(0, 2).map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                      isActive
+                        ? 'bg-brandIndigo/20 text-brandCyan border border-brandCyan/20 shadow-glow'
+                        : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 hover:dark:text-white hover:bg-slate-100 hover:dark:bg-white/5 border border-transparent'
+                    }`
+                  }
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
+
+              {/* Explore Dropdown */}
+              <div className="relative" ref={exploreDropdownRef}>
+                <button
+                  onClick={() => setExploreOpen(!exploreOpen)}
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 outline-none ${
+                    exploreOpen || exploreItems.some(item => window.location.pathname === item.to)
+                      ? 'bg-brandIndigo/10 text-brandCyan dark:bg-brandIndigo/20 border border-brandCyan/10'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 hover:dark:text-white hover:bg-slate-100 hover:dark:bg-white/5 border border-transparent'
+                  }`}
+                >
+                  <Compass className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                  <span>Explore</span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-300 ${exploreOpen ? 'rotate-180 text-brandCyan' : ''}`} />
+                </button>
+
+                {exploreOpen && (
+                  <div className="absolute left-0 mt-2 w-52 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-2.5 space-y-1 animate-fadeIn z-50">
+                    {exploreItems.map((item) => (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        onClick={() => setExploreOpen(false)}
+                        className={({ isActive }) =>
+                          `flex items-center space-x-2.5 px-3 py-2 rounded-xl text-xs font-semibold border border-transparent transition-all duration-200 ${
+                            isActive
+                              ? 'bg-brandIndigo/10 text-brandCyan dark:bg-brandIndigo/25'
+                              : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 hover:dark:text-white hover:bg-slate-100 hover:dark:bg-white/5'
+                          }`
+                        }
+                      >
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.label}</span>
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {mainNavItems.slice(2).map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
