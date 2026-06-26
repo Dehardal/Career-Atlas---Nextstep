@@ -6,7 +6,7 @@ import { api } from '../../services/api';
 import { useRoadmapStore } from '../../store/useRoadmapStore';
 
 export const SuggestionModal: React.FC = () => {
-  const { suggestionModalOpen, setSuggestionModalOpen, theme } = useRoadmapStore();
+  const { suggestionModalOpen, setSuggestionModalOpen } = useRoadmapStore();
 
   // Form States
   const [visitorName, setVisitorName] = useState('');
