@@ -23,7 +23,7 @@ import { CustomDropdown } from '../../components/common/CustomDropdown';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { setStartNode, setTargetNode } = useRoadmapStore();
+  const { setStartNode, setTargetNode, setSuggestionModalOpen } = useRoadmapStore();
 
   const [qualifications, setQualifications] = useState<Node[]>([]);
   const [careers, setCareers] = useState<Node[]>([]);
@@ -599,12 +599,7 @@ export const HomePage: React.FC = () => {
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={() => {
-                  const footerEl = document.getElementById('footer');
-                  if (footerEl) {
-                    footerEl.scrollIntoView({ behavior: 'smooth' });
-                  }
-                }}
+                onClick={() => setSuggestionModalOpen(true)}
                 className="w-full md:w-auto flex items-center justify-center space-x-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-brandCyan via-brandIndigo to-purple-500 text-white font-bold text-sm shadow-lg shadow-brandIndigo/25"
               >
                 <PlusCircle className="w-4.5 h-4.5" />

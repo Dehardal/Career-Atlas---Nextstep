@@ -27,6 +27,10 @@ interface RoadmapState {
   savedRoadmaps: SavedRoadmap[];
   bookmarks: Bookmark[];
 
+  // Suggestion Modal State
+  suggestionModalOpen: boolean;
+  setSuggestionModalOpen: (open: boolean) => void;
+
   setStartNode: (node: Node | null) => void;
   setTargetNode: (node: Node | null) => void;
   setSelectedPathIndex: (index: number) => void;
@@ -72,6 +76,7 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
   // Saved Roadmaps & Bookmarks Initial
   savedRoadmaps: [],
   bookmarks: [],
+  suggestionModalOpen: false,
 
   // Auth State Init
   user: (() => {
@@ -389,6 +394,7 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
     } catch (err: any) {
       set({ error: err.response?.data?.error || 'Failed to delete bookmark', loading: false });
     }
-  }
+  },
+  setSuggestionModalOpen: (open: boolean) => set({ suggestionModalOpen: open })
 }));
 export default useRoadmapStore;

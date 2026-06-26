@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import { SuggestionModal } from '../common/SuggestionModal';
 
 export const PublicLayout: React.FC = () => {
   return (
@@ -11,6 +12,7 @@ export const PublicLayout: React.FC = () => {
         <Outlet />
       </main>
       <Footer />
+      <SuggestionModal />
     </div>
   );
 };
