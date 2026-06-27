@@ -246,8 +246,11 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
 
         if (positionedParents.length > 0) {
           const avgY =
-            positionedParents.reduce((sum, pId) => sum + yPositions.get(pId)!, 0) /
-            positionedParents.length;
+            positionedParents.reduce((sum, pId) => {
+              const customPos = customPositionsRef.current.get(pId);
+              const parentY = customPos ? customPos.y : yPositions.get(pId)!;
+              return sum + parentY;
+            }, 0) / positionedParents.length;
           preferredY.set(nodeId, avgY);
         } else {
           preferredY.set(nodeId, 0);
