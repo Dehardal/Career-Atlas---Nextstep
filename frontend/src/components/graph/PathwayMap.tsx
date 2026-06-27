@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -44,6 +44,18 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
   const [rfNodes, setRfNodes, onNodesChange] = useNodesState<any>([]);
   const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<any>([]);
   const { theme } = useRoadmapStore();
+  const customPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+
+  // Clear custom positions when startNodeId changes to reset layout for a new starting node
+  useEffect(() => {
+    customPositionsRef.current.clear();
+  }, [startNodeId]);
+
+  const onNodeDragStop = (_event: React.MouseEvent, node: any) => {
+    if (node && node.position) {
+      customPositionsRef.current.set(node.id, node.position);
+    }
+  };
 
   useEffect(() => {
     if (nodes.length === 0) {
@@ -274,13 +286,17 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
       const x = d * 310 + 40; // Horizontal gap of 310px per depth level
       const y = yPositions.get(node._id) ?? 0;
 
+      // Check if this node has a user-dragged position
+      const customPos = customPositionsRef.current.get(node._id);
+      const finalPosition = customPos ? customPos : { x, y };
+
       const isHighlighted = highlightedPathNodeIds.includes(node._id);
       const isRoot = node._id === startNodeId;
 
       return {
         id: node._id,
         type: 'customNode',
-        position: { x, y },
+        position: finalPosition,
         data: {
           node,
           isHighlighted,
@@ -385,6 +401,7 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodeDragStop={onNodeDragStop}
         fitView
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.2}

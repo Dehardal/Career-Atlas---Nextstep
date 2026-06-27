@@ -1,20 +1,14 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Compass,
   Users,
   Target,
   Shield,
-  Heart,
-  Award,
   Sparkles,
   Cpu,
-  GitFork,
   ArrowRight,
-  TrendingUp,
-  Map,
   BookOpen,
-  GraduationCap
+  GraduationCap,
+  Briefcase
 } from 'lucide-react';
 
 export const AboutPage: React.FC = () => {
