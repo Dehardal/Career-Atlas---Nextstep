@@ -51,7 +51,7 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
     customPositionsRef.current.clear();
   }, [startNodeId]);
 
-  const onNodeDragStop = (_event: React.MouseEvent, node: any) => {
+  const onNodeDragStop = (_event: any, node: any) => {
     if (node && node.position) {
       customPositionsRef.current.set(node.id, node.position);
     }
