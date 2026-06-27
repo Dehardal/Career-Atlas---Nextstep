@@ -301,7 +301,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* 2. HOW IT WORKS SECTION (Widescreen contrasting bar) */}
-      <section className="w-full py-20 bg-slate-100/80 dark:bg-[#070B13]/80 border-y border-slate-200 dark:border-white/5 relative z-10">
+      <section id="about" className="w-full py-20 bg-slate-100/80 dark:bg-[#070B13]/80 border-y border-slate-200 dark:border-white/5 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="space-y-12">
             <div className="text-center max-w-2xl mx-auto space-y-3">
