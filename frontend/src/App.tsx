@@ -14,6 +14,7 @@ import DegreePage from './features/degrees/DegreePage';
 import ExamPage from './features/exams/ExamPage';
 import InstitutePage from './features/institutes/InstitutePage';
 import DashboardPage from './features/dashboard/DashboardPage';
+import { AboutPage } from './features/about/AboutPage';
 
 // Admin Pages
 import { AdminSuggestionsPage } from './features/admin/AdminSuggestionsPage';
@@ -48,6 +49,7 @@ export const App: React.FC = () => {
           <Route path="exams" element={<ExamPage />} />
           <Route path="institutes" element={<InstitutePage />} />
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="about" element={<AboutPage />} />
         </Route>
 
         {/* ADMIN APPLICATION */}

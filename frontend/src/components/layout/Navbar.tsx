@@ -58,12 +58,7 @@ export const Navbar: React.FC = () => {
   const activeExploreItem = exploreItems.find(item => location.pathname === item.to);
   const ExploreIcon = activeExploreItem ? activeExploreItem.icon : Compass;
 
-  const handleAboutClick = (e: React.MouseEvent) => {
-    if (location.pathname === '/') {
-      e.preventDefault();
-      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -175,18 +170,19 @@ export const Navbar: React.FC = () => {
               ))}
 
               {/* About Link */}
-              <Link
-                to="/#about"
-                onClick={handleAboutClick}
-                className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  location.hash === '#about' && location.pathname === '/'
-                    ? 'bg-brandIndigo/20 text-brandCyan border border-brandCyan/20 shadow-glow'
-                    : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 hover:dark:text-white hover:bg-slate-100 hover:dark:bg-white/5 border border-transparent'
-                }`}
+              <NavLink
+                to="/about"
+                className={({ isActive }) =>
+                  `flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                    isActive
+                      ? 'bg-brandIndigo/20 text-brandCyan border border-brandCyan/20 shadow-glow'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 hover:dark:text-white hover:bg-slate-100 hover:dark:bg-white/5 border border-transparent'
+                  }`
+                }
               >
                 <Info className="w-4 h-4 animate-none" />
                 <span>About</span>
-              </Link>
+              </NavLink>
             </div>
 
             {/* Theme Toggle */}
@@ -373,17 +369,20 @@ export const Navbar: React.FC = () => {
           ))}
 
           {/* Mobile About Link */}
-          <Link
-            to="/#about"
-            onClick={(e) => {
-              setIsOpen(false);
-              handleAboutClick(e);
-            }}
-            className="flex items-center space-x-2 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 hover:dark:text-white hover:bg-slate-100 hover:dark:bg-white/5 transition-all"
+          <NavLink
+            to="/about"
+            onClick={() => setIsOpen(false)}
+            className={({ isActive }) =>
+              `flex items-center space-x-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                isActive
+                  ? 'bg-brandIndigo/10 dark:bg-brandIndigo/20 text-brandCyan border border-brandCyan/25'
+                  : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 hover:dark:text-white hover:bg-slate-100 hover:dark:bg-white/5'
+              }`
+            }
           >
             <Info className="w-4.5 h-4.5" />
             <span>About</span>
-          </Link>
+          </NavLink>
 
           {user && user.role === 'ADMIN' && (
             <Link
