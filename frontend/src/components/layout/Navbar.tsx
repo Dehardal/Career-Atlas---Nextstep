@@ -15,7 +15,6 @@ import {
   Shield,
   ChevronDown,
   User as UserIcon,
-  MoreHorizontal,
   Info,
 } from 'lucide-react';
 import { useRoadmapStore } from '../../store/useRoadmapStore';
