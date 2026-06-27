@@ -46,18 +46,18 @@ export const Navbar: React.FC = () => {
   const mainNavItems = [
     { to: '/', label: 'Home', icon: Compass },
     { to: '/roadmap', label: 'Roadmap Explorer', icon: Compass },
+    { to: '/search', label: 'Search', icon: Search },
   ];
 
-  const moreItems = [
+  const exploreItems = [
     { to: '/careers', label: 'Careers', icon: Briefcase },
     { to: '/degrees', label: 'Degrees', icon: GraduationCap },
     { to: '/exams', label: 'Exams', icon: FileText },
     { to: '/institutes', label: 'Institutes', icon: Landmark },
-    { to: '/search', label: 'Search', icon: Search },
   ];
 
-  const activeMoreItem = moreItems.find(item => location.pathname === item.to);
-  const MoreIcon = activeMoreItem ? activeMoreItem.icon : MoreHorizontal;
+  const activeExploreItem = exploreItems.find(item => location.pathname === item.to);
+  const ExploreIcon = activeExploreItem ? activeExploreItem.icon : Compass;
 
   const handleAboutClick = (e: React.MouseEvent) => {
     if (location.pathname === '/') {
@@ -103,7 +103,7 @@ export const Navbar: React.FC = () => {
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-4">
             <div className="flex space-x-1 items-center">
-              {mainNavItems.map((item) => (
+              {mainNavItems.slice(0, 2).map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
@@ -120,24 +120,24 @@ export const Navbar: React.FC = () => {
                 </NavLink>
               ))}
 
-              {/* More Dropdown */}
+              {/* Explore Dropdown */}
               <div className="relative" ref={exploreDropdownRef}>
                 <button
                   onClick={() => setExploreOpen(!exploreOpen)}
                   className={`flex items-center space-x-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 outline-none ${
-                    exploreOpen || activeMoreItem
+                    exploreOpen || activeExploreItem
                       ? 'bg-brandIndigo/10 text-brandCyan dark:bg-brandIndigo/20 border border-brandCyan/10 shadow-glow'
                       : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 hover:dark:text-white hover:bg-slate-100 hover:dark:bg-white/5 border border-transparent'
                   }`}
                 >
-                  <MoreIcon className={`w-4 h-4 transition-colors duration-300 ${exploreOpen || activeMoreItem ? 'text-brandCyan' : 'text-slate-400 dark:text-slate-500'}`} />
-                  <span>{activeMoreItem ? activeMoreItem.label : 'More'}</span>
+                  <ExploreIcon className={`w-4 h-4 transition-colors duration-300 ${exploreOpen || activeExploreItem ? 'text-brandCyan' : 'text-slate-400 dark:text-slate-500'}`} />
+                  <span>{activeExploreItem ? activeExploreItem.label : 'Explore'}</span>
                   <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-300 ${exploreOpen ? 'rotate-180 text-brandCyan' : ''}`} />
                 </button>
 
                 {exploreOpen && (
                   <div className="absolute left-0 mt-2 w-52 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-2.5 space-y-1 animate-fadeIn z-50">
-                    {moreItems.map((item) => (
+                    {exploreItems.map((item) => (
                       <NavLink
                         key={item.to}
                         to={item.to}
@@ -157,6 +157,23 @@ export const Navbar: React.FC = () => {
                   </div>
                 )}
               </div>
+
+              {mainNavItems.slice(2).map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+                      isActive
+                        ? 'bg-brandIndigo/20 text-brandCyan border border-brandCyan/20 shadow-glow'
+                        : 'text-slate-700 dark:text-slate-300 hover:text-slate-950 hover:dark:text-white hover:bg-slate-100 hover:dark:bg-white/5 border border-transparent'
+                    }`
+                  }
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
 
               {/* About Link */}
               <Link
