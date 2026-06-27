@@ -1147,22 +1147,22 @@ export const RoadmapPage: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSaveModalOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/60 dark:bg-black/70 backdrop-blur-sm"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-sm bg-[#090D16] border border-white/10 rounded-2xl shadow-2xl p-6 z-10 space-y-4"
+              className="relative w-full max-w-sm bg-white dark:bg-[#0B1120] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 z-10 space-y-4 transition-colors duration-300"
             >
-              <div className="flex justify-between items-center pb-2 border-b border-white/5">
-                <h3 className="text-sm font-bold text-white flex items-center space-x-1.5">
+              <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-white/5">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
                   <Save className="w-4 h-4 text-brandCyan" />
                   <span>Save Pathway Planner</span>
                 </h3>
                 <button
                   onClick={() => setSaveModalOpen(false)}
-                  className="text-slate-400 hover:text-white"
+                  className="text-slate-400 hover:text-slate-800 hover:dark:text-white transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1170,23 +1170,23 @@ export const RoadmapPage: React.FC = () => {
               
               <div className="space-y-3">
                 <div>
-                  <label className="block text-[10px] text-slate-500 mb-1">Roadmap Title</label>
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Roadmap Title</label>
                   <input
                     type="text"
                     placeholder="e.g. My AI Engineer Path"
                     value={saveTitle}
                     onChange={(e) => setSaveTitle(e.target.value)}
-                    className="w-full bg-[#0E1524] border border-white/10 text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-slate-50 dark:bg-[#080C14] border border-slate-200 dark:border-white/5 text-xs text-slate-800 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-brandCyan dark:focus:border-brandCyan focus:ring-0 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-slate-500 mb-1">Notes / Description (Optional)</label>
+                  <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Notes / Description (Optional)</label>
                   <textarea
                     placeholder="Brief notes about your target timeline or classes..."
                     value={saveDescription}
                     onChange={(e) => setSaveDescription(e.target.value)}
                     rows={3}
-                    className="w-full bg-[#0E1524] border border-white/10 text-xs text-white rounded-lg p-2.5 focus:outline-none focus:border-cyan-400 resize-none"
+                    className="w-full bg-slate-50 dark:bg-[#080C14] border border-slate-200 dark:border-white/5 text-xs text-slate-800 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-brandCyan dark:focus:border-brandCyan focus:ring-0 transition-all resize-none"
                   />
                 </div>
               </div>
@@ -1194,7 +1194,7 @@ export const RoadmapPage: React.FC = () => {
               <div className="flex items-center space-x-3 pt-2">
                 <button
                   onClick={() => setSaveModalOpen(false)}
-                  className="flex-1 py-2 rounded-xl border border-white/10 text-slate-400 hover:text-white text-xs font-semibold"
+                  className="flex-1 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-800 hover:dark:text-white hover:bg-slate-50 hover:dark:bg-white/5 text-xs font-semibold transition-all"
                 >
                   Cancel
                 </button>
@@ -1203,8 +1203,8 @@ export const RoadmapPage: React.FC = () => {
                   disabled={!saveTitle.trim()}
                   className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
                     saveTitle.trim()
-                      ? 'bg-brandCyan hover:brightness-110 text-slate-950 font-bold'
-                      : 'bg-slate-800 text-slate-650 cursor-not-allowed'
+                      ? 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-lg'
+                      : 'bg-slate-200 dark:bg-slate-850 text-slate-400 dark:text-slate-650 cursor-not-allowed'
                   }`}
                 >
                   Save Planner

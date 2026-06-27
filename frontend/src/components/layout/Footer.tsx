@@ -48,10 +48,11 @@ export const Footer: React.FC = () => {
           <ul className="space-y-2">
             {[
               { to: '/', label: 'Home' },
-              { to: '/roadmap', label: 'Path Finder' },
+              { to: '/roadmap', label: 'Roadmap Explorer' },
               { to: '/careers', label: 'Careers' },
               { to: '/degrees', label: 'Degrees' },
-              { to: '/exams', label: 'Entrance Exams' },
+              { to: '/exams', label: 'Exams' },
+              { to: '/institutes', label: 'Institutes' },
             ].map((link) => (
               <li key={link.to}>
                 <NavLink 
@@ -71,9 +72,7 @@ export const Footer: React.FC = () => {
           <ul className="space-y-2">
             {[
               { to: '/dashboard', label: 'Student Dashboard' },
-              { to: '/institutes', label: 'College Mappings' },
-              { to: '/search', label: 'Advanced Search' },
-              { to: '/admin', label: 'Moderator Board' },
+              { to: '/search', label: 'Search' },
             ].map((link) => (
               <li key={link.to}>
                 <NavLink 

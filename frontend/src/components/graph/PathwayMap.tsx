@@ -374,7 +374,7 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
   return (
     <div className="w-full h-full min-h-[500px] bg-slate-50 dark:bg-[#080C14] rounded-2xl border border-slate-200 dark:border-white/5 relative overflow-hidden">
       {/* Floating UX Instruction Tooltip */}
-      <div className="absolute top-4 left-4 z-10 bg-white/80 dark:bg-[#0E1524]/85 backdrop-blur-md border border-slate-200 dark:border-white/5 px-3.5 py-2 rounded-xl pointer-events-none flex items-center space-x-2 text-[10px] text-slate-500 dark:text-slate-400 shadow-lg">
+      <div className="absolute top-4 right-4 z-10 bg-white/80 dark:bg-[#0E1524]/85 backdrop-blur-md border border-slate-200 dark:border-white/5 px-3.5 py-2 rounded-xl pointer-events-none flex items-center space-x-2 text-[10px] text-slate-500 dark:text-slate-400 shadow-lg">
         <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
         <span>Drag to pan • Scroll to zoom • Use node buttons to explore</span>
       </div>
