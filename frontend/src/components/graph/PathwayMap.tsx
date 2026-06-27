@@ -222,16 +222,24 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
       levels[d].push(node._id);
     });
 
-    // 4. Align children under parent average Y coordinates and resolve 1D overlaps
+    // 4. Align children under parent average coordinates and resolve 1D overlaps
     const VERTICAL_GAP = 140;
     const minSpacing = 150; // card height + vertical gap
     const yPositions = new Map<string, number>();
+    const xPositions = new Map<string, number>();
 
     // Position level 0
     const level0 = levels[0] || [];
     level0.forEach((nodeId, idx) => {
-      const offset = ((level0.length - 1) * VERTICAL_GAP) / 2;
-      yPositions.set(nodeId, idx * VERTICAL_GAP - offset);
+      const customPos = customPositionsRef.current.get(nodeId);
+      if (customPos) {
+        yPositions.set(nodeId, customPos.y);
+        xPositions.set(nodeId, customPos.x);
+      } else {
+        const offset = ((level0.length - 1) * VERTICAL_GAP) / 2;
+        yPositions.set(nodeId, idx * VERTICAL_GAP - offset);
+        xPositions.set(nodeId, 40);
+      }
     });
 
     // Process levels 1+
@@ -245,6 +253,7 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
         const positionedParents = parents.filter((pId) => yPositions.has(pId));
 
         if (positionedParents.length > 0) {
+          // Calculate preferred Y
           const avgY =
             positionedParents.reduce((sum, pId) => {
               const customPos = customPositionsRef.current.get(pId);
@@ -252,12 +261,22 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
               return sum + parentY;
             }, 0) / positionedParents.length;
           preferredY.set(nodeId, avgY);
+
+          // Calculate preferred X based on parents' actual X positions + 310
+          const avgX =
+            positionedParents.reduce((sum, pId) => {
+              const customPos = customPositionsRef.current.get(pId);
+              const parentX = customPos ? customPos.x : xPositions.get(pId)!;
+              return sum + parentX;
+            }, 0) / positionedParents.length;
+          xPositions.set(nodeId, avgX + 310);
         } else {
           preferredY.set(nodeId, 0);
+          xPositions.set(nodeId, d * 310 + 40);
         }
       });
 
-      // Sort by preferred coordinate to preserve vertical order
+      // Sort by preferred Y coordinate to preserve vertical order
       currentLevel.sort((a, b) => preferredY.get(a)! - preferredY.get(b)!);
 
       // Force-directed 1D separation sweep along the Y axis
@@ -285,13 +304,12 @@ export const PathwayMap: React.FC<PathwayMapProps> = ({
 
     // 5. Create flow nodes
     const flowNodes = nodes.map((node) => {
-      const d = depths.get(node._id) ?? 0;
-      const x = d * 310 + 40; // Horizontal gap of 310px per depth level
-      const y = yPositions.get(node._id) ?? 0;
+      const defaultX = xPositions.get(node._id) ?? (depths.get(node._id) ?? 0) * 310 + 40;
+      const defaultY = yPositions.get(node._id) ?? 0;
 
       // Check if this node has a user-dragged position
       const customPos = customPositionsRef.current.get(node._id);
-      const finalPosition = customPos ? customPos : { x, y };
+      const finalPosition = customPos ? customPos : { x: defaultX, y: defaultY };
 
       const isHighlighted = highlightedPathNodeIds.includes(node._id);
       const isRoot = node._id === startNodeId;
