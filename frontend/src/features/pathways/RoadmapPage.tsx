@@ -150,6 +150,53 @@ export const RoadmapPage: React.FC = () => {
   };
 
   const handleDownloadCustomPath = () => {
+    // Select the react-flow container element
+    const flowElement = document.querySelector('.react-flow') as HTMLElement;
+    if (!flowElement) {
+      alert('Map container not found. Downloading text version instead.');
+      downloadTextFallback();
+      return;
+    }
+
+    // Hide controls, minimap, and other non-canvas UI overlays from the image
+    // @ts-ignore
+    import('html-to-image').then(({ toPng }) => {
+      toPng(flowElement, {
+        backgroundColor: document.documentElement.classList.contains('dark') ? '#080C14' : '#f8fafc',
+        style: {
+          transform: 'none', // Reset viewport transforms for snapshot
+        },
+        filter: (node: any) => {
+          if (
+            node?.classList?.contains('react-flow__controls') ||
+            node?.classList?.contains('react-flow__minimap') ||
+            node?.classList?.contains('absolute') // excludes instructions tooltip, banners, controls card, etc.
+          ) {
+            return false;
+          }
+          return true;
+        },
+      })
+      .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = `career-atlas-custom-roadmap.png`;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      })
+      .catch((err) => {
+        console.error('Failed to export map as image', err);
+        alert('Could not export map as image. Downloading text version instead.');
+        downloadTextFallback();
+      });
+    }).catch((err) => {
+      console.error('html-to-image import failed', err);
+      downloadTextFallback();
+    });
+  };
+
+  const downloadTextFallback = () => {
     const textLines = [
       `==================================================`,
       `          CAREER ATLAS - MY CUSTOM ROADMAP        `,
