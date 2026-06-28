@@ -21,7 +21,10 @@ import {
   Star,
   Save,
   ChevronRight,
-  RotateCcw
+  RotateCcw,
+  Download,
+  CheckCircle2,
+  PlusCircle
 } from 'lucide-react';
 import { useRoadmapStore } from '../../store/useRoadmapStore';
 import { api } from '../../services/api';
@@ -81,6 +84,128 @@ export const RoadmapPage: React.FC = () => {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [saveTitle, setSaveTitle] = useState('');
   const [saveDescription, setSaveDescription] = useState('');
+
+  // Custom Selected Path state
+  const [customSelectedNodeIds, setCustomSelectedNodeIds] = useState<string[]>([]);
+  const [saveCustomModalOpen, setSaveCustomModalOpen] = useState(false);
+  const [saveCustomTitle, setSaveCustomTitle] = useState('');
+  const [saveCustomDescription, setSaveCustomDescription] = useState('');
+  const [customSaveLoading, setCustomSaveLoading] = useState(false);
+
+  const handleToggleCustomPath = () => {
+    if (!selectedNode) return;
+    if (customSelectedNodeIds.includes(selectedNode._id)) {
+      setCustomSelectedNodeIds(customSelectedNodeIds.filter((id) => id !== selectedNode._id));
+    } else {
+      setCustomSelectedNodeIds([...customSelectedNodeIds, selectedNode._id]);
+    }
+  };
+
+  const handleSaveCustomPath = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || customSelectedNodeIds.length === 0) return;
+
+    // Build relationship sequence based on adjacent selected nodes
+    const relationshipSequence: string[] = [];
+    for (let i = 0; i < customSelectedNodeIds.length - 1; i++) {
+      const fromId = customSelectedNodeIds[i];
+      const toId = customSelectedNodeIds[i + 1];
+      const rel = explorerRelationships.find((r) => {
+        const rFrom = typeof r.fromNode === 'string' ? r.fromNode : r.fromNode._id;
+        const rTo = typeof r.toNode === 'string' ? r.toNode : r.toNode._id;
+        return rFrom === fromId && rTo === toId;
+      });
+      if (rel) {
+        relationshipSequence.push(rel._id);
+      }
+    }
+
+    setCustomSaveLoading(true);
+    try {
+      await api.saveRoadmap({
+        email: user.email,
+        title: saveCustomTitle,
+        description: saveCustomDescription,
+        nodeSequence: customSelectedNodeIds,
+        relationshipSequence,
+      });
+      // Fetch updated dashboard
+      const [roadmaps, bkmarks] = await Promise.all([
+        api.getSavedRoadmaps(user.email),
+        api.getBookmarks(user.email)
+      ]);
+      useRoadmapStore.setState({ savedRoadmaps: roadmaps, bookmarks: bkmarks });
+      
+      setSaveCustomTitle('');
+      setSaveCustomDescription('');
+      setCustomSelectedNodeIds([]);
+      setSaveCustomModalOpen(false);
+      alert('Custom path saved successfully!');
+    } catch (err: any) {
+      console.error('Failed to save custom path', err);
+      alert(err.response?.data?.error || 'Failed to save custom path');
+    } finally {
+      setCustomSaveLoading(false);
+    }
+  };
+
+  const handleDownloadCustomPath = () => {
+    const textLines = [
+      `==================================================`,
+      `          CAREER ATLAS - MY CUSTOM ROADMAP        `,
+      `==================================================`,
+      `Generated on: ${new Date().toLocaleDateString()}`,
+      `Total Steps: ${customSelectedNodeIds.length}`,
+      ``,
+      `PATHWAY STEPS:`,
+    ];
+
+    customSelectedNodeIds.forEach((id, index) => {
+      const nodeObj = explorerNodes.find((n) => n._id === id);
+      if (!nodeObj) return;
+
+      const typeLabel = (() => {
+        switch (nodeObj.type) {
+          case 'QUALIFICATION': return 'Education Level';
+          case 'BOARD': return 'Education Board';
+          case 'STREAM': return 'Academic Stream';
+          case 'SUBJECT_COMBINATION': return 'Required Subjects';
+          case 'EXAM': return 'Entrance Exam';
+          case 'DEGREE': return 'Degree Course';
+          case 'OCCUPATION': return 'Target Career';
+          case 'SKILL': return 'Skill Tree';
+          case 'INSTITUTE': return 'College / University';
+          default: return nodeObj.type;
+        }
+      })();
+
+      textLines.push(`[Step ${index + 1}] ${nodeObj.name} (${typeLabel})`);
+      if (nodeObj.description) {
+        textLines.push(`   Description: ${nodeObj.description}`);
+      }
+
+      if (nodeObj.type === 'OCCUPATION' && nodeObj.averageSalaryRange) {
+        textLines.push(`   Average Salary: INR ${nodeObj.averageSalaryRange.min.toLocaleString()} - INR ${nodeObj.averageSalaryRange.max.toLocaleString()}`);
+      }
+
+      textLines.push(``);
+    });
+
+    textLines.push(`==================================================`);
+    textLines.push(`Thank you for using Career Atlas to plan your career pathway!`);
+
+    const textContent = textLines.join('\n');
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `career-atlas-custom-roadmap.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
 
   // Fetch offering colleges when a DEGREE node is selected
   const [offeringColleges, setOfferingColleges] = useState<InstituteCourseMapping[]>([]);
@@ -539,7 +664,7 @@ export const RoadmapPage: React.FC = () => {
               <PathwayMap
                 nodes={viewMode === 'EXPLORER' ? explorerNodes : allNodes}
                 relationships={viewMode === 'EXPLORER' ? explorerRelationships : allRelationships}
-                highlightedPathNodeIds={viewMode === 'EXPLORER' ? [] : activePathNodeIds}
+                highlightedPathNodeIds={viewMode === 'EXPLORER' ? customSelectedNodeIds : activePathNodeIds}
                 onNodeSelect={(node) => setSelectedNode(node)}
                 viewMode={viewMode}
                 expandedNodeIds={expandedNodeIds}
@@ -563,6 +688,70 @@ export const RoadmapPage: React.FC = () => {
                     : `Blue path represents alternative #${selectedPathIndex + 1}`}
                 </span>
               </div>
+
+              {/* Custom Path Builder Floating Card */}
+              {viewMode === 'EXPLORER' && customSelectedNodeIds.length > 0 && (
+                <div className="absolute top-16 left-4 z-10 bg-white/95 dark:bg-[#0E1524]/95 backdrop-blur border border-slate-200 dark:border-white/10 p-4 rounded-2xl shadow-xl w-64 space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-2">
+                    <span className="text-xs font-extrabold text-slate-800 dark:text-white flex items-center space-x-1.5">
+                      <Map className="w-3.5 h-3.5 text-teal-500" />
+                      <span>My Custom Path</span>
+                    </span>
+                    <span className="text-[10px] bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 px-2 py-0.5 rounded-full font-mono font-bold">
+                      {customSelectedNodeIds.length} Nodes
+                    </span>
+                  </div>
+
+                  {/* Mini list of selected nodes */}
+                  <div className="max-h-32 overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
+                    {customSelectedNodeIds.map((id, index) => {
+                      const nodeObj = explorerNodes.find(n => n._id === id);
+                      if (!nodeObj) return null;
+                      return (
+                        <div key={id} className="flex items-center space-x-2 text-[10px] text-slate-600 dark:text-slate-400">
+                          <span className="w-4 h-4 rounded-full bg-teal-500/15 border border-teal-500/30 flex items-center justify-center font-mono font-bold text-[8px] text-teal-600 dark:text-teal-400 shrink-0">
+                            {index + 1}
+                          </span>
+                          <span className="truncate flex-1 font-medium">{nodeObj.name}</span>
+                          <button
+                            onClick={() => setCustomSelectedNodeIds(customSelectedNodeIds.filter(cid => cid !== id))}
+                            className="p-0.5 text-slate-400 hover:text-red-500 hover:bg-slate-100 dark:hover:bg-white/5 rounded transition-colors shrink-0"
+                            title="Remove"
+                          >
+                            <X className="w-2.5 h-2.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/5">
+                    <button
+                      onClick={() => setSaveCustomModalOpen(true)}
+                      className="flex items-center justify-center space-x-1 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-[10px] font-bold shadow-md transition-all"
+                      title="Save to dashboard"
+                    >
+                      <Save className="w-3 h-3" />
+                      <span>Save Path</span>
+                    </button>
+                    <button
+                      onClick={handleDownloadCustomPath}
+                      className="flex items-center justify-center space-x-1 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 text-[10px] font-bold transition-all"
+                      title="Download Path"
+                    >
+                      <Download className="w-3 h-3" />
+                      <span>Download</span>
+                    </button>
+                    <button
+                      onClick={() => setCustomSelectedNodeIds([])}
+                      className="col-span-2 text-center py-1 text-[9px] text-slate-400 hover:text-red-500 dark:hover:text-red-400 font-semibold transition-colors"
+                    >
+                      Clear Path
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Explorer History Controls Bar */}
               {viewMode === 'EXPLORER' && (
@@ -721,6 +910,29 @@ export const RoadmapPage: React.FC = () => {
                   )}
                 </div>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">{selectedNode.description}</p>
+
+                {/* Custom Path Selection Toggle Button */}
+                {viewMode === 'EXPLORER' && (
+                  <div className="mt-4">
+                    {customSelectedNodeIds.includes(selectedNode._id) ? (
+                      <button
+                        onClick={handleToggleCustomPath}
+                        className="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition-all shadow-md focus:outline-none"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-white" />
+                        <span>Remove from Custom Path</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleToggleCustomPath}
+                        className="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-xl border border-teal-500/30 hover:border-teal-500/60 hover:bg-teal-500/5 text-teal-600 dark:text-teal-400 text-xs font-bold transition-all focus:outline-none"
+                      >
+                        <PlusCircle className="w-4 h-4" />
+                        <span>Add to Custom Path</span>
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Dynamic properties inspector */}
@@ -1323,6 +1535,88 @@ export const RoadmapPage: React.FC = () => {
                   Save Planner
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Save Custom Pathway Modal */}
+      <AnimatePresence>
+        {saveCustomModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSaveCustomModalOpen(false)}
+              className="absolute inset-0 bg-black/60 dark:bg-black/70 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-sm bg-white dark:bg-[#0B1120] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 z-10 space-y-4 transition-colors duration-300"
+            >
+              <form onSubmit={handleSaveCustomPath} className="space-y-4">
+                <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-white/5">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-1.5">
+                    <Save className="w-4 h-4 text-teal-500" />
+                    <span>Save Custom Pathway</span>
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setSaveCustomModalOpen(false)}
+                    className="text-slate-400 hover:text-slate-800 hover:dark:text-white transition-colors focus:outline-none"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Roadmap Title</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. My Custom Architecture Path"
+                      value={saveCustomTitle}
+                      onChange={(e) => setSaveCustomTitle(e.target.value)}
+                      required
+                      className="w-full bg-slate-50 dark:bg-[#080C14] border border-slate-200 dark:border-white/5 text-xs text-slate-800 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-teal-500 dark:focus:border-teal-500 focus:ring-0 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Notes / Description (Optional)</label>
+                    <textarea
+                      placeholder="Brief notes about your targeted timeline or milestones..."
+                      value={saveCustomDescription}
+                      onChange={(e) => setSaveCustomDescription(e.target.value)}
+                      rows={3}
+                      className="w-full bg-slate-50 dark:bg-[#080C14] border border-slate-200 dark:border-white/5 text-xs text-slate-800 dark:text-white rounded-lg p-2.5 focus:outline-none focus:border-teal-500 dark:focus:border-teal-500 focus:ring-0 transition-all resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setSaveCustomModalOpen(false)}
+                    className="flex-1 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-800 hover:dark:text-white hover:bg-slate-50 hover:dark:bg-white/5 text-xs font-semibold transition-all focus:outline-none"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!saveCustomTitle.trim() || customSaveLoading}
+                    className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all focus:outline-none ${
+                      saveCustomTitle.trim() && !customSaveLoading
+                        ? 'bg-gradient-to-r from-teal-600 to-emerald-500 hover:from-teal-500 hover:to-emerald-400 text-white shadow-lg shadow-teal-500/10'
+                        : 'bg-slate-200 dark:bg-slate-850 text-slate-400 dark:text-slate-650 cursor-not-allowed'
+                    }`}
+                  >
+                    {customSaveLoading ? 'Saving...' : 'Save Path'}
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}
