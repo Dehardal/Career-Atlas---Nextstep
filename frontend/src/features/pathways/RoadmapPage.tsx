@@ -20,7 +20,8 @@ import {
   LogIn,
   Star,
   Save,
-  ChevronRight
+  ChevronRight,
+  RotateCcw
 } from 'lucide-react';
 import { useRoadmapStore } from '../../store/useRoadmapStore';
 import { api } from '../../services/api';
@@ -52,6 +53,7 @@ export const RoadmapPage: React.FC = () => {
     expandNode,
     collapseNode,
     resetExplorer,
+    setExplorerState,
     user,
     bookmarks,
     saveRoadmap,
@@ -129,6 +131,81 @@ export const RoadmapPage: React.FC = () => {
       fetchPathways();
     }
   }, [startNode, targetNode, fetchPathways]);
+
+  // Explorer history state to support Undo (Previous), Redo (Next), and Reset
+  interface ExplorerHistoryEntry {
+    nodes: ApiNode[];
+    relationships: Relationship[];
+    expandedNodeIds: string[];
+  }
+
+  const [explorerHistory, setExplorerHistory] = useState<ExplorerHistoryEntry[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isNavigatingHistory, setIsNavigatingHistory] = useState(false);
+
+  // Explorer history synchronizer
+  useEffect(() => {
+    if (viewMode !== 'EXPLORER' || !startNode) {
+      setExplorerHistory([]);
+      setHistoryIndex(-1);
+      return;
+    }
+
+    if (isNavigatingHistory) {
+      setIsNavigatingHistory(false);
+      return;
+    }
+
+    if (explorerNodes.length === 0) return;
+
+    const currentEntry = explorerHistory[historyIndex];
+    const isDifferent =
+      !currentEntry ||
+      explorerNodes.length !== currentEntry.nodes.length ||
+      explorerRelationships.length !== currentEntry.relationships.length ||
+      expandedNodeIds.length !== currentEntry.expandedNodeIds.length ||
+      !expandedNodeIds.every((id) => currentEntry.expandedNodeIds.includes(id));
+
+    if (isDifferent) {
+      const updatedHistory = explorerHistory.slice(0, historyIndex + 1);
+      updatedHistory.push({
+        nodes: [...explorerNodes],
+        relationships: [...explorerRelationships],
+        expandedNodeIds: [...expandedNodeIds],
+      });
+      setExplorerHistory(updatedHistory);
+      setHistoryIndex(updatedHistory.length - 1);
+    }
+  }, [explorerNodes, explorerRelationships, expandedNodeIds, viewMode, startNode]);
+
+  const handlePrevious = () => {
+    if (historyIndex > 0) {
+      const prevIndex = historyIndex - 1;
+      const prevEntry = explorerHistory[prevIndex];
+      setIsNavigatingHistory(true);
+      setHistoryIndex(prevIndex);
+      setExplorerState(prevEntry.nodes, prevEntry.relationships, prevEntry.expandedNodeIds);
+      setSelectedNode(null);
+    }
+  };
+
+  const handleNext = () => {
+    if (historyIndex < explorerHistory.length - 1) {
+      const nextIndex = historyIndex + 1;
+      const nextEntry = explorerHistory[nextIndex];
+      setIsNavigatingHistory(true);
+      setHistoryIndex(nextIndex);
+      setExplorerState(nextEntry.nodes, nextEntry.relationships, nextEntry.expandedNodeIds);
+      setSelectedNode(null);
+    }
+  };
+
+  const handleResetExplorer = () => {
+    if (startNode) {
+      resetExplorer(startNode);
+      setSelectedNode(null);
+    }
+  };
 
   // Aggregate all nodes and relationships across all pathways
   const allNodes: ApiNode[] = [];
@@ -405,10 +482,7 @@ export const RoadmapPage: React.FC = () => {
                 Expand All Branches
               </button>
               <button
-                onClick={() => {
-                  resetExplorer(startNode);
-                  setSelectedNode(null);
-                }}
+                onClick={handleResetExplorer}
                 disabled={loading}
                 className="w-full text-center bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-bold py-2.5 rounded-xl border border-slate-200 dark:border-white/10 transition-all disabled:opacity-50"
               >
@@ -489,6 +563,45 @@ export const RoadmapPage: React.FC = () => {
                     : `Blue path represents alternative #${selectedPathIndex + 1}`}
                 </span>
               </div>
+
+              {/* Explorer History Controls Bar */}
+              {viewMode === 'EXPLORER' && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center space-x-2 bg-white/95 dark:bg-[#0E1524]/95 backdrop-blur border border-slate-200 dark:border-white/10 px-3.5 py-2 rounded-2xl shadow-xl">
+                  <button
+                    onClick={handlePrevious}
+                    disabled={historyIndex <= 0}
+                    className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 hover:dark:bg-white/5 disabled:opacity-40 transition-all focus:outline-none"
+                    title="Go to previous step"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Previous</span>
+                  </button>
+                  
+                  <div className="w-px h-4 bg-slate-250 dark:bg-white/10" />
+
+                  <button
+                    onClick={handleResetExplorer}
+                    disabled={explorerNodes.length <= 1 && expandedNodeIds.length === 0}
+                    className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-500/10 disabled:opacity-40 transition-all focus:outline-none"
+                    title="Reset explorer map"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Reset</span>
+                  </button>
+
+                  <div className="w-px h-4 bg-slate-250 dark:bg-white/10" />
+
+                  <button
+                    onClick={handleNext}
+                    disabled={historyIndex >= explorerHistory.length - 1}
+                    className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 hover:dark:bg-white/5 disabled:opacity-40 transition-all focus:outline-none"
+                    title="Go to next step"
+                  >
+                    <span>Next</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
             </div>
           ) : (loading && (
             (viewMode === 'EXPLORER' && explorerNodes.length === 0) ||

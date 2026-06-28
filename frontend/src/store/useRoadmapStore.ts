@@ -43,6 +43,7 @@ interface RoadmapState {
   expandNode: (nodeId: string) => Promise<void>;
   collapseNode: (nodeId: string) => void;
   resetExplorer: (startNode: Node) => void;
+  setExplorerState: (nodes: Node[], relationships: Relationship[], expandedNodeIds: string[]) => void;
   toggleTheme: () => void;
 
   // Auth Actions
@@ -303,6 +304,13 @@ export const useRoadmapStore = create<RoadmapState>((set, get) => ({
       pathways: []
     });
     get().expandNode(startNode._id);
+  },
+  setExplorerState: (nodes: Node[], relationships: Relationship[], expandedNodeIds: string[]) => {
+    set({
+      explorerNodes: nodes,
+      explorerRelationships: relationships,
+      expandedNodeIds
+    });
   },
   toggleTheme: () => {
     const nextTheme = get().theme === 'dark' ? 'light' : 'dark';
