@@ -24,10 +24,19 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security and utility middleware
 app.use(
   helmet({
-    contentSecurityPolicy: false, // Allow loading frontend scripts, stylesheets, and Google Identity Services SDK
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        // Securely allow embedding only from your own website and your local portfolio dev server
+        frameAncestors: ["'self'", "http://localhost:13000", "http://localhost:5173"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
+    frameguard: false, // Disable legacy X-Frame-Options since CSP frameAncestors handles it securely in modern browsers
   })
 );
 app.use(cors());
