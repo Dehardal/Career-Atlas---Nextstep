@@ -1,5 +1,7 @@
 # Career Atlas 🧭
 
+🌐 **Live Demo:** [https://career-atlas-nextstep.onrender.com/](https://career-atlas-nextstep.onrender.com/)
+
 Career Atlas is an interactive, premium career path exploration and mapping platform designed to navigate educational milestones, degrees, entrance exams, and professional occupations. It guides students through the branching requirements of secondary, higher secondary, undergraduate, and postgraduate pathways, complete with real-time smart college recommendations and pathway validation rules.
 
 ---
@@ -76,6 +78,8 @@ Open `http://localhost:5173` in your browser.
 ---
 
 ## ☁️ Deployment on Render
+
+The production website is live and hosted at: [https://career-atlas-nextstep.onrender.com/](https://career-atlas-nextstep.onrender.com/)
 
 This project is structured as a monorepo, making it extremely easy to host:
 
