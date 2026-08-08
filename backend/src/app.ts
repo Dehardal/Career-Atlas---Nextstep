@@ -30,7 +30,7 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         // Securely allow embedding only from your own website and your local portfolio dev server
-        frameAncestors: ["'self'", "http://localhost:13000", "http://localhost:5173"],
+        frameAncestors: ["'self'", "http://localhost:13000", "http://localhost:5173", "https://*.vercel.app", "https://portfolio-dehardal.vercel.app"],
         scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:", "https:"],
